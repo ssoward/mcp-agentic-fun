@@ -1,6 +1,6 @@
-# Quick Start Guide - MCP Agentic Fun
+# Quick Start Guide - MCP Agentic Development Platform
 
-This guide will help you quickly build and run the MCP Agentic Fun project.
+This guide will help you quickly build and run the MCP Agentic Development Platform project.
 
 ## Prerequisites
 
@@ -136,7 +136,7 @@ python3 client.py
 
 ## 🎯 What's Included
 
-The MCP Agentic Fun system includes:
+The MCP Agentic Development Platform system includes:
 
 - **13 Agentic Tools** for various operations
 - **Dynamic Web UI** with interactive diagrams

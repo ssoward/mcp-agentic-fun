@@ -20,7 +20,7 @@ const initializeRequest = {
   params: {
     protocolVersion: "1.0",
     capabilities: {},
-    clientInfo: { name: "MCP Agentic Fun CLI", version: "1.0.0" }
+    clientInfo: { name: "MCP Agentic Development Platform CLI", version: "1.0.0" }
   }
 };
 const toolRequest = {

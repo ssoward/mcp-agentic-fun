@@ -1,7 +1,7 @@
 #!/bin/bash
-# Simple build and run script for MCP Agentic Fun
+# Simple build and run script for MCP Agentic Development Platform
 
-echo "MCP Agentic Fun - Build and Run Script"
+echo "MCP Agentic Development Platform - Build and Run Script"
 echo "======================================"
 
 # Check command line argument

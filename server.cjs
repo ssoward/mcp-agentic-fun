@@ -18,7 +18,7 @@ app.post("/mcp-client", (req, res) => {
     params: {
       protocolVersion: "1.0",
       capabilities: {},
-      clientInfo: { name: "MCP Agentic Fun UI", version: "1.0.0" }
+      clientInfo: { name: "MCP Agentic Development Platform UI", version: "1.0.0" }
     }
   };
   const toolRequest = {
@@ -94,5 +94,5 @@ app.post("/mcp-client", (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`MCP Agentic Fun UI running at http://localhost:${PORT}/ui.html`);
+  console.log(`MCP Agentic Development Platform UI running at http://localhost:${PORT}/ui.html`);
 });

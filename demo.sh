@@ -1,8 +1,8 @@
 #!/bin/bash
-# MCP Agentic Fun - Complete System Demonstration
+# MCP Agentic Development Platform - Complete System Demonstration
 # This script demonstrates all 7 extensions working together
 
-echo "🎉 MCP Agentic Fun - Complete System Demo"
+echo "🎉 MCP Agentic Development Platform - Complete System Demo"
 echo "==========================================="
 echo ""
 
@@ -95,5 +95,5 @@ echo "Python CLI:  python3 client.py --interactive"
 echo "Test Tool:   echo '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"1.0\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0.0\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"plan-trip\",\"arguments\":{\"destination\":\"Paris\",\"date\":\"2025-06-01\"}}}' | node build/src/index.js"
 
 echo ""
-echo "🎉 MCP Agentic Fun system is ready for use!"
+echo "🎉 MCP Agentic Development Platform system is ready for use!"
 echo "Visit the Web UI for the best experience: http://localhost:3000/ui.html"

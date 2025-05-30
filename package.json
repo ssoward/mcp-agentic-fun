@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "MCP Agentic Development Platform - Comprehensive MCP development environment with interactive visualizations, multiple client interfaces, and advanced agentic capabilities",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.28",

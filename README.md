@@ -1,4 +1,4 @@
-# MCP Agentic Fun - Complete Agentic System
+# MCP Agentic Development Platform - Complete Agentic System
 
 A comprehensive demonstration of the Model Context Protocol (MCP) with advanced agentic capabilities, featuring 7 major extensions and multiple client interfaces.
 

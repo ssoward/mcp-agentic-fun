@@ -1,8 +1,8 @@
 @echo off
-REM MCP Agentic Fun - Build and Run Script for Windows
+REM MCP Agentic Development Platform - Build and Run Script for Windows
 REM Usage: run.bat [mode]
 
-echo MCP Agentic Fun - Build and Run Script
+echo MCP Agentic Development Platform - Build and Run Script
 echo ======================================
 
 REM Check command line argument

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive build and run system for the MCP Agentic Fun project, designed to simplify development, testing, and deployment workflows.
+This document describes the comprehensive build and run system for the MCP Agentic Development Platform project, designed to simplify development, testing, and deployment workflows.
 
 ## 🔧 System Components
 
@@ -269,4 +269,4 @@ Potential improvements to the build system:
 
 ---
 
-This build and run system provides a robust, user-friendly foundation for developing and operating the MCP Agentic Fun project across different platforms and use cases.
+This build and run system provides a robust, user-friendly foundation for developing and operating the MCP Agentic Development Platform project across different platforms and use cases.

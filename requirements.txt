@@ -1,4 +1,4 @@
-# Python dependencies for MCP Agentic Fun clients
+# Python dependencies for MCP Agentic Development Platform clients
 # Extension 4: Expanded Client Options
 
 # Optional: Colored terminal output

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Agentic Fun - Python Client
+MCP Agentic Development Platform - Python Client
 Extension 4: Expanded Client Options
 
 This Python client demonstrates how to interact with the MCP server from Python,
@@ -33,7 +33,7 @@ except ImportError:
     HAS_COLOR = False
 
 class MCPClient:
-    """Python client for MCP Agentic Fun server"""
+    """Python client for MCP Agentic Development Platform server"""
     
     def __init__(self, server_path: str = "build/src/index.js"):
         self.server_path = server_path
@@ -183,7 +183,7 @@ def print_result(result: Dict[str, Any]):
 
 def interactive_mode(client: MCPClient):
     """Interactive mode for tool selection and execution"""
-    print_colored("\n🤖 MCP Agentic Fun - Interactive Mode", "cyan")
+    print_colored("\n🤖 MCP Agentic Development Platform - Interactive Mode", "cyan")
     print_colored("Type 'help' for commands, 'exit' to quit\n", "yellow")
     
     while True:
@@ -298,7 +298,7 @@ def execute_tool(client: MCPClient, tool_name: str, args: Dict[str, Any]):
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(
-        description="MCP Agentic Fun - Python Client",
+        description="MCP Agentic Development Platform - Python Client",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
