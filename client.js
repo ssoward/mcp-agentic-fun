@@ -17,14 +17,18 @@ const initializeRequest = {
   jsonrpc: "2.0",
   id: 1,
   method: "initialize",
-  params: {}
+  params: {
+    protocolVersion: "1.0",
+    capabilities: {},
+    clientInfo: { name: "MCP Agentic Fun CLI", version: "1.0.0" }
+  }
 };
 const toolRequest = {
   jsonrpc: "2.0",
   id: 2,
-  method: "callTool",
+  method: "tools/call",
   params: {
-    tool,
+    name: tool,
     arguments: args
   }
 };

@@ -18,6 +18,17 @@ coverage/
 # Logs
 *.log
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+
 # Misc
 *.swp
 *.swo

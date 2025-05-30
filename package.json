@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --passWithNoTests --config jest.config.mjs",
-    "build": "tsc && chmod 755 build/index.js",
-    "start": "node build/index.js",
-    "ui": "node server.js",
+    "build": "tsc && chmod 755 build/src/index.js",
+    "start": "node build/src/index.js",
+    "ui": "node server.cjs",
     "client": "node client.js",
     "all": "npm run build && concurrently \"npm run start\" \"npm run ui\""
   },
@@ -29,7 +29,7 @@
   },
   "type": "module",
   "bin": {
-    "weather-agentic-demo": "./build/index.js"
+    "weather-agentic-demo": "./build/src/index.js"
   },
   "files": [
     "build"

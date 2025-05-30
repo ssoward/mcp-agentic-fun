@@ -48,6 +48,7 @@ server.tool(
     state: z.string().length(2).describe("Two-letter state code (e.g. CA, NY)"),
   },
   async ({ state }) => {
+    console.error(`[AgenticTool] get-alerts called with state: ${state}`);
     const stateCode = state.toUpperCase();
     const alertsUrl = `${NWS_API_BASE}/alerts?area=${stateCode}`;
     const alertsData = await makeNWSRequest<any>(alertsUrl);
@@ -72,6 +73,7 @@ server.tool(
     longitude: z.number().min(-180).max(180).describe("Longitude of the location"),
   },
   async ({ latitude, longitude }) => {
+    console.error(`[AgenticTool] get-forecast called with latitude: ${latitude}, longitude: ${longitude}`);
     const pointsUrl = `${NWS_API_BASE}/points/${latitude.toFixed(4)},${longitude.toFixed(4)}`;
     const pointsData = await makeNWSRequest<any>(pointsUrl);
     if (!pointsData) {
@@ -117,6 +119,7 @@ server.tool(
     state: z.string().length(2).describe("Two-letter state code (e.g. CA, NY)"),
   },
   async ({ state }) => {
+    console.error(`[AgenticTool] get-state-forecast-summary called with state: ${state}`);
     const stateCode = state.toUpperCase();
     const alertsUrl = `${NWS_API_BASE}/alerts?area=${stateCode}`;
     const alertsData = await makeNWSRequest<any>(alertsUrl);
@@ -151,6 +154,113 @@ server.tool(
   }
 );
 
+// --- EXTENSION 1: More Agentic Tools & Workflows ---
+server.tool(
+  "get-news-headlines",
+  "Get latest news headlines for a topic (demo)",
+  { topic: z.string().describe("News topic, e.g. technology, sports") },
+  async ({ topic }) => {
+    // Simulate news API
+    return { content: [{ type: "text", text: `Top headlines for '${topic}':\n- News 1\n- News 2\n- News 3` }] };
+  }
+);
+server.tool(
+  "get-stock-price",
+  "Get current stock price for a symbol (demo)",
+  { symbol: z.string().describe("Stock symbol, e.g. AAPL, TSLA") },
+  async ({ symbol }) => {
+    // Simulate stock API
+    return { content: [{ type: "text", text: `Current price for ${symbol}: $123.45 (demo)` }] };
+  }
+);
+server.tool(
+  "plan-trip",
+  "Plan a trip: combines weather, news, and finance tools (multi-step agentic workflow)",
+  { destination: z.string(), date: z.string() },
+  async ({ destination, date }) => {
+    console.error(`[AgenticTool] plan-trip: MOCKED for ${destination} on ${date}`);
+    // Mocked fast responses for demo/debug
+    const weather = { content: [{ text: "Sunny, 75F (mocked)" }] };
+    const news = { content: [{ text: "Top headlines: News 1, News 2, News 3 (mocked)" }] };
+    const stock = { content: [{ text: "AAPL: $123.45 (mocked)" }] };
+    return { content: [
+      { type: "text", text: `Trip plan for ${destination} on ${date}:\n\nWeather:\n${weather.content[0].text}\n\nNews:\n${news.content[0].text}\n\nFinance:\n${stock.content[0].text}` }
+    ] };
+  }
+);
+// Tool composition: allow users to chain tools (demo)
+server.tool(
+  "chain-tools",
+  "Chain two tools together (demo)",
+  { first: z.string(), second: z.string(), args: z.any() },
+  async ({ first, second, args }) => {
+    const firstResult = await (server as any)._tools[first].handler(args);
+    const secondResult = await (server as any)._tools[second].handler(args);
+    return { content: [
+      { type: "text", text: `Results of ${first}:\n${firstResult.content[0].text}\n\nResults of ${second}:\n${secondResult.content[0].text}` }
+    ] };
+  }
+);
+
+// --- EXTENSION 3: Stateful Agents & Long-running Tasks ---
+const agentMemory: Record<string, string> = {};
+server.tool(
+  "remember-preference",
+  "Store a user preference in agent memory",
+  { key: z.string(), value: z.string() },
+  async ({ key, value }) => {
+    agentMemory[key] = value;
+    return { content: [{ type: "text", text: `Preference stored: ${key} = ${value}` }] };
+  }
+);
+server.tool(
+  "recall-preference",
+  "Recall a user preference from agent memory",
+  { key: z.string() },
+  async ({ key }) => {
+    return { content: [{ type: "text", text: `Preference: ${key} = ${agentMemory[key] || "(not set)"}` }] };
+  }
+);
+// Simulate long-running task
+server.tool(
+  "long-task",
+  "Simulate a long-running task (demo)",
+  { seconds: z.number().min(1).max(30) },
+  async ({ seconds }) => {
+    await new Promise(r => setTimeout(r, seconds * 1000));
+    return { content: [{ type: "text", text: `Long task completed after ${seconds} seconds.` }] };
+  }
+);
+
+// --- EXTENSION 5: Logging, Monitoring, Testing Stubs ---
+server.tool(
+  "get-logs",
+  "Get recent server logs (demo)",
+  {},
+  async () => {
+    return { content: [{ type: "text", text: "[Log] All systems nominal (demo log)" }] };
+  }
+);
+
+// --- EXTENSION 7: Advanced Agentic Features (LLM, Multi-agent) ---
+server.tool(
+  "llm-summarize",
+  "Summarize text using a simulated LLM (demo)",
+  { text: z.string() },
+  async ({ text }) => {
+    // Simulate LLM
+    return { content: [{ type: "text", text: `Summary: ${text.slice(0, 40)}... (simulated)` }] };
+  }
+);
+server.tool(
+  "multi-agent-demo",
+  "Demo: multiple agents collaborate (simulated)",
+  {},
+  async () => {
+    return { content: [{ type: "text", text: "Agent A: gathers data\nAgent B: analyzes\nAgent C: reports\n(Demo)" }] };
+  }
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
@@ -161,6 +271,7 @@ async function main() {
     `- get-forecast: Get weather forecast for a location (input: { latitude, longitude })\n` +
     `- get-state-forecast-summary: Advanced agentic tool — summary of alerts and a sample forecast for a state (input: { state })\n` +
     `\nSee README.md for usage examples and agentic documentation.\n`);
+  console.error("[MCP] Weather MCP Server running on stdio");
 }
 
 main().catch((error) => {

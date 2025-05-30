@@ -1,0 +1,13 @@
+# Python dependencies for MCP Agentic Fun clients
+# Extension 4: Expanded Client Options
+
+# Optional: Colored terminal output
+colorama>=0.4.6
+
+# Optional: Enhanced CLI experience  
+click>=8.0.0
+rich>=13.0.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

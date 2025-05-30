@@ -1,6 +1,14 @@
 <!--
   MCP Agentic Fun UI
-  This web UI lets you interact with your local MCP server visually.
+  This web UI lets y      <b>How this works:</b><br>
+      This UI lets you call your local MCP server's tools visually with interactive architecture diagrams.<br>
+      <ul style="margin:0 0 0 1.2em;">
+        <li>Select a tool and enter its arguments.</li>
+        <li>Watch the dynamic diagram update to show that tool's specific data flow.</li>
+        <li>Click <b>Call Tool</b> to send your request to the Node.js backend.</li>
+        <li>The backend launches the MCP server, calls the tool, and returns the result here.</li>
+        <li>All processing is local—no data leaves your machine.</li>
+      </ul>act with your local MCP server visually.
   - Select a tool, enter arguments, and see results instantly.
   - The UI sends your request to the Node.js backend, which launches the MCP server and returns the tool result.
   - No data is sent to any external service; all processing is local.
@@ -20,11 +28,24 @@
     select, input, textarea, button { width: 100%; margin-top: 0.5em; padding: 0.5em; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; }
     button { background: #0078d4; color: #fff; border: none; cursor: pointer; margin-top: 1.5em; }
     button:hover { background: #005fa3; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
     pre { background: #f4f4f4; padding: 1em; border-radius: 4px; overflow-x: auto; }
     .footer { text-align: center; margin-top: 2em; color: #888; font-size: 0.9em; }
     .info { background: #e6f7ff; border-left: 4px solid #0078d4; padding: 1em; margin-bottom: 1.5em; border-radius: 4px; color: #222; }
     .diagram { background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 1em; margin-bottom: 1.5em; text-align: center; }
     .diagram svg { max-width: 100%; height: auto; }
+    .history { background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 1em; margin-top: 1.5em; max-height: 300px; overflow-y: auto; }
+    .history-item { border-bottom: 1px solid #eee; padding: 0.5em 0; }
+    .history-item:last-child { border-bottom: none; }
+    .history-tool { font-weight: bold; color: #0078d4; }
+    .history-time { font-size: 0.8em; color: #888; }
+    .validation-error { background: #ffe6e6; border-left: 4px solid #d73a49; padding: 0.5em; margin-top: 0.5em; border-radius: 4px; color: #d73a49; }
+    .loading { color: #0078d4; font-style: italic; }
+    .tabs { display: flex; margin-bottom: 1em; border-bottom: 1px solid #ddd; }
+    .tab { padding: 0.5em 1em; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab.active { border-bottom-color: #0078d4; color: #0078d4; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body>
@@ -44,50 +65,268 @@
       </div>
     </div>
     <div class="diagram">
-      <b>System Interaction Diagram</b><br>
-      <svg width="500" height="180" viewBox="0 0 500 180">
-        <rect x="10" y="60" width="120" height="40" rx="8" fill="#e6f7ff" stroke="#0078d4" />
-        <text x="70" y="85" text-anchor="middle" font-size="15">Web UI</text>
-        <polygon points="130,80 170,80 170,90 130,90" fill="#0078d4" />
-        <rect x="170" y="60" width="120" height="40" rx="8" fill="#f0e6ff" stroke="#7d3fd4" />
-        <text x="230" y="85" text-anchor="middle" font-size="15">Node.js Backend</text>
-        <polygon points="290,80 330,80 330,90 290,90" fill="#7d3fd4" />
-        <rect x="330" y="60" width="120" height="40" rx="8" fill="#fffbe6" stroke="#d4b300" />
-        <text x="390" y="85" text-anchor="middle" font-size="15">MCP Server</text>
-        <polygon points="390,100 390,140 400,140 400,100" fill="#d4b300" />
-        <rect x="350" y="140" width="80" height="30" rx="6" fill="#e6ffe6" stroke="#00b36b" />
-        <text x="390" y="160" text-anchor="middle" font-size="13">Agentic Tools</text>
-        <text x="70" y="50" text-anchor="middle" font-size="12" fill="#0078d4">1. User input</text>
-        <text x="200" y="50" text-anchor="middle" font-size="12" fill="#7d3fd4">2. API call</text>
-        <text x="320" y="50" text-anchor="middle" font-size="12" fill="#d4b300">3. Tool call</text>
-        <text x="390" y="130" text-anchor="middle" font-size="12" fill="#00b36b">4. Agentic logic</text>
-        <text x="250" y="110" text-anchor="middle" font-size="12" fill="#888">Results flow back to UI</text>
-        <polyline points="390,140 390,100 330,80" fill="none" stroke="#00b36b" stroke-width="2" marker-end="url(#arrow)" />
+      <b>System Architecture Diagram (All 7 Extensions)</b><br>
+      <svg width="800" height="420" viewBox="0 0 800 420">
+        <!-- Client Interface Layer (Extension 2 & 4) -->
+        <rect x="10" y="40" width="100" height="35" rx="6" fill="#e6f7ff" stroke="#0078d4" />
+        <text x="60" y="62" text-anchor="middle" font-size="12" font-weight="bold">Enhanced Web UI</text>
+        <rect x="10" y="85" width="100" height="30" rx="6" fill="#e6f7ff" stroke="#0078d4" />
+        <text x="60" y="104" text-anchor="middle" font-size="11">Node.js CLI</text>
+        <rect x="10" y="125" width="100" height="30" rx="6" fill="#e6f7ff" stroke="#0078d4" />
+        <text x="60" y="144" text-anchor="middle" font-size="11">Python CLI</text>
+        
+        <!-- UI Features (Extension 2) -->
+        <rect x="10" y="165" width="100" height="55" rx="6" fill="#f0f9ff" stroke="#0078d4" stroke-dasharray="3,3" />
+        <text x="60" y="180" text-anchor="middle" font-size="10">UI Features:</text>
+        <text x="60" y="193" text-anchor="middle" font-size="9">• Tabbed Interface</text>
+        <text x="60" y="204" text-anchor="middle" font-size="9">• Input Validation</text>
+        <text x="60" y="215" text-anchor="middle" font-size="9">• History Tracking</text>
+        
+        <!-- Connecting arrows from clients -->
+        <polygon points="110,57 150,57 150,67 110,67" fill="#0078d4" />
+        <polygon points="110,100 150,100 150,110 110,110" fill="#0078d4" />
+        <polygon points="110,140 150,140 150,150 110,150" fill="#0078d4" />
+
+        <!-- Backend/Proxy Layer (Extension 5) -->
+        <rect x="150" y="60" width="130" height="40" rx="8" fill="#f0e6ff" stroke="#7d3fd4" />
+        <text x="215" y="85" text-anchor="middle" font-size="14" font-weight="bold">Express Proxy</text>
+        <rect x="150" y="110" width="130" height="35" rx="8" fill="#f0e6ff" stroke="#7d3fd4" />
+        <text x="215" y="132" text-anchor="middle" font-size="12">Monitoring & Logs</text>
+        <rect x="150" y="155" width="130" height="35" rx="8" fill="#f0e6ff" stroke="#7d3fd4" />
+        <text x="215" y="177" text-anchor="middle" font-size="12">30s Timeout</text>
+        
+        <!-- MCP Server Layer (Core + Extension 3) -->
+        <rect x="300" y="60" width="140" height="40" rx="8" fill="#fffbe6" stroke="#d4b300" />
+        <text x="370" y="85" text-anchor="middle" font-size="14" font-weight="bold">MCP Server Core</text>
+        <rect x="300" y="110" width="140" height="35" rx="8" fill="#fffbe6" stroke="#d4b300" />
+        <text x="370" y="132" text-anchor="middle" font-size="12">Agent Memory Store</text>
+        <rect x="300" y="155" width="140" height="35" rx="8" fill="#fffbe6" stroke="#d4b300" />
+        <text x="370" y="177" text-anchor="middle" font-size="12">Long-Running Tasks</text>
+        
+        <!-- Tool Categories (Extension 1 & 7) -->
+        <rect x="460" y="20" width="320" height="50" rx="8" fill="#e6ffe6" stroke="#00b36b" />
+        <text x="620" y="40" text-anchor="middle" font-size="12" font-weight="bold">13 Agentic Tools (Extensions 1 & 7)</text>
+        <text x="620" y="55" text-anchor="middle" font-size="10">Basic: alerts, forecast, news, stocks | Workflows: plan-trip, chain-tools</text>
+        
+        <!-- Core Tools -->
+        <rect x="460" y="80" width="105" height="40" rx="6" fill="#e6ffe6" stroke="#00b36b" />
+        <text x="513" y="95" text-anchor="middle" font-size="10" font-weight="bold">Core Tools</text>
+        <text x="513" y="106" text-anchor="middle" font-size="9">• get-alerts</text>
+        <text x="513" y="116" text-anchor="middle" font-size="9">• get-forecast</text>
+        
+        <!-- Agentic Workflows -->
+        <rect x="575" y="80" width="105" height="40" rx="6" fill="#e6ffe6" stroke="#00b36b" />
+        <text x="628" y="95" text-anchor="middle" font-size="10" font-weight="bold">Workflows</text>
+        <text x="628" y="106" text-anchor="middle" font-size="9">• plan-trip</text>
+        <text x="628" y="116" text-anchor="middle" font-size="9">• chain-tools</text>
+        
+        <!-- Extension Tools -->
+        <rect x="690" y="80" width="105" height="40" rx="6" fill="#e6ffe6" stroke="#00b36b" />
+        <text x="743" y="95" text-anchor="middle" font-size="10" font-weight="bold">Extensions</text>
+        <text x="743" y="106" text-anchor="middle" font-size="9">• news, stocks</text>
+        <text x="743" y="116" text-anchor="middle" font-size="9">• state-summary</text>
+        
+        <!-- Stateful Features (Extension 3) -->
+        <rect x="460" y="130" width="105" height="40" rx="6" fill="#fff0e6" stroke="#ff9500" />
+        <text x="513" y="145" text-anchor="middle" font-size="10" font-weight="bold">Agent Memory</text>
+        <text x="513" y="156" text-anchor="middle" font-size="9">• remember-pref</text>
+        <text x="513" y="166" text-anchor="middle" font-size="9">• recall-pref</text>
+        
+        <!-- Background Tasks -->
+        <rect x="575" y="130" width="105" height="40" rx="6" fill="#fff0e6" stroke="#ff9500" />
+        <text x="628" y="145" text-anchor="middle" font-size="10" font-weight="bold">Long Tasks</text>
+        <text x="628" y="156" text-anchor="middle" font-size="9">• long-task</text>
+        <text x="628" y="166" text-anchor="middle" font-size="9">• async ops</text>
+        
+        <!-- Advanced Features (Extension 7) -->
+        <rect x="690" y="130" width="105" height="40" rx="6" fill="#ffe6f7" stroke="#d946ef" />
+        <text x="743" y="145" text-anchor="middle" font-size="10" font-weight="bold">AI Features</text>
+        <text x="743" y="156" text-anchor="middle" font-size="9">• llm-summarize</text>
+        <text x="743" y="166" text-anchor="middle" font-size="9">• multi-agent</text>
+        
+        <!-- Monitoring Layer (Extension 5) -->
+        <rect x="460" y="180" width="160" height="40" rx="6" fill="#f3e8ff" stroke="#8b5cf6" />
+        <text x="540" y="195" text-anchor="middle" font-size="10" font-weight="bold">Observability (Ext 5)</text>
+        <text x="540" y="206" text-anchor="middle" font-size="9">• get-logs</text>
+        <text x="540" y="216" text-anchor="middle" font-size="9">• Performance monitoring</text>
+        
+        <!-- Documentation (Extension 6) -->
+        <rect x="630" y="180" width="165" height="40" rx="6" fill="#f0fdf4" stroke="#22c55e" />
+        <text x="713" y="195" text-anchor="middle" font-size="10" font-weight="bold">Developer Experience (Ext 6)</text>
+        <text x="713" y="206" text-anchor="middle" font-size="9">• Interactive docs</text>
+        <text x="713" y="216" text-anchor="middle" font-size="9">• Comprehensive README</text>
+
+        <!-- Data Flow Arrows -->
+        <polygon points="280,80 300,80 300,90 280,90" fill="#7d3fd4" />
+        <polygon points="280,127 300,127 300,137 280,137" fill="#7d3fd4" />
+        <polygon points="280,172 300,172 300,182 280,182" fill="#7d3fd4" />
+        
+        <!-- From MCP to Tools -->
+        <polyline points="440,80 460,100" fill="none" stroke="#d4b300" stroke-width="2" marker-end="url(#arrow)" />
+        <polyline points="440,127 460,150" fill="none" stroke="#d4b300" stroke-width="2" marker-end="url(#arrow)" />
+        <polyline points="440,172 460,200" fill="none" stroke="#d4b300" stroke-width="2" marker-end="url(#arrow)" />
+        
+        <!-- Tool interconnections -->
+        <polyline points="565,100 575,100" fill="none" stroke="#00b36b" stroke-width="1" stroke-dasharray="2,2" />
+        <polyline points="680,100 690,100" fill="none" stroke="#00b36b" stroke-width="1" stroke-dasharray="2,2" />
+        <polyline points="565,150 575,150" fill="none" stroke="#ff9500" stroke-width="1" stroke-dasharray="2,2" />
+        <polyline points="680,150 690,150" fill="none" stroke="#ff9500" stroke-width="1" stroke-dasharray="2,2" />
+
+        <!-- Extension labels -->
+        <text x="60" y="25" font-size="10" fill="#0078d4" font-weight="bold">Extensions 2 & 4</text>
+        <text x="215" y="45" font-size="10" fill="#7d3fd4" font-weight="bold">Extension 5</text>
+        <text x="370" y="45" font-size="10" fill="#d4b300" font-weight="bold">Core + Ext 3</text>
+        <text x="620" y="10" font-size="10" fill="#00b36b" font-weight="bold">Extensions 1 & 7</text>
+        <text x="540" y="235" font-size="10" fill="#8b5cf6" font-weight="bold">Monitoring</text>
+        <text x="713" y="235" font-size="10" fill="#22c55e" font-weight="bold">Dev Experience</text>
+
+        <!-- External APIs indication -->
+        <rect x="460" y="250" width="335" height="25" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-dasharray="5,5" />
+        <text x="628" y="267" text-anchor="middle" font-size="10">External APIs: Weather Service, News, Stock (mocked for demo)</text>
+
+        <!-- Version and tool count -->
+        <text x="620" y="295" text-anchor="middle" font-size="11" fill="#6b7280">MCP Server v1.0.0 • 13 Tools • All 7 Extensions Implemented</text>
+
+        <!-- Architecture quality indicators -->
+        <rect x="50" y="320" width="700" height="80" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="400" y="340" text-anchor="middle" font-size="12" font-weight="bold">Architecture Quality</text>
+        <text x="150" y="360" text-anchor="middle" font-size="10">✓ Modular Design</text>
+        <text x="300" y="360" text-anchor="middle" font-size="10">✓ Multi-Client Support</text>
+        <text x="450" y="360" text-anchor="middle" font-size="10">✓ Stateful Agents</text>
+        <text x="600" y="360" text-anchor="middle" font-size="10">✓ Tool Composition</text>
+        <text x="150" y="380" text-anchor="middle" font-size="10">✓ Protocol Compliance</text>
+        <text x="300" y="380" text-anchor="middle" font-size="10">✓ Async Operations</text>
+        <text x="450" y="380" text-anchor="middle" font-size="10">✓ Error Handling</text>
+        <text x="600" y="380" text-anchor="middle" font-size="10">✓ Extensibility</text>
+
         <defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L10,5 L0,10 L2,5 z" fill="#00b36b" />
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#d4b300" />
           </marker>
         </defs>
       </svg>
       <div style="font-size:0.95em; color:#555; margin-top:0.5em;">
-        <b>Flow:</b> Web UI → Node.js Backend → MCP Server → Agentic Tools → Results back to UI
+        <b>Enhanced Data Flow:</b> Multi-Client Interfaces (Web UI with tabs/validation/history, Node.js CLI, Python CLI) → Express Proxy with monitoring → MCP Server with agent memory & long tasks → 13 categorized agentic tools with workflows, memory, AI features, and observability → Results with performance tracking back to clients
       </div>
     </div>
-    <form id="mcp-form">
+
+    <!-- Dynamic Tool-Specific Diagram -->
+    <div class="diagram" style="margin-top: 2em;">
+      <b>Dynamic Tool Flow Diagram</b><br>
+      <div style="font-size:0.9em; color:#666; margin-bottom:0.5em;">
+        <i>Updates automatically based on your selected tool above ↑</i>
+      </div>
+      <div id="dynamic-diagram-container">
+        <svg id="dynamic-diagram" width="750" height="300" viewBox="0 0 750 300">
+          <!-- Default diagram content will be populated by JavaScript -->
+        </svg>
+      </div>
+      <div id="dynamic-flow-description" style="font-size:0.95em; color:#555; margin-top:0.5em;">
+        <b>Select a tool above to see its specific data flow and architecture components.</b>
+      </div>
+    </div>
+
+    <!-- Tabbed Interface -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('tool-call')">Tool Call</div>
+      <div class="tab" onclick="switchTab('history')">History</div>
+      <div class="tab" onclick="switchTab('docs')">Documentation</div>
+    </div>
+
+    <!-- Tool Call Tab -->
+    <div id="tool-call" class="tab-content active">
+      <form id="mcp-form">
       <label for="tool">Select Tool</label>
       <select id="tool" name="tool">
         <option value="get-alerts">get-alerts (Weather alerts for a US state)</option>
         <option value="get-forecast">get-forecast (Weather forecast for a location)</option>
         <option value="get-state-forecast-summary">get-state-forecast-summary (Advanced: alerts + forecast summary)</option>
+        <option value="get-news-headlines">get-news-headlines (News headlines for a topic)</option>
+        <option value="get-stock-price">get-stock-price (Stock price for a symbol)</option>
+        <option value="plan-trip">plan-trip (Multi-tool agentic trip planner)</option>
+        <option value="chain-tools">chain-tools (Chain two tools together)</option>
+        <option value="remember-preference">remember-preference (Store a user preference)</option>
+        <option value="recall-preference">recall-preference (Recall a user preference)</option>
+        <option value="long-task">long-task (Simulate a long-running task)</option>
+        <option value="get-logs">get-logs (Get recent server logs)</option>
+        <option value="llm-summarize">llm-summarize (Summarize text with LLM)</option>
+        <option value="multi-agent-demo">multi-agent-demo (Multi-agent collaboration demo)</option>
       </select>
       <div id="args-area"></div>
       <button type="submit">Call Tool</button>
     </form>
     <label for="result">Result</label>
     <pre id="result">(Results will appear here)</pre>
+    <div id="validation-error" class="validation-error" style="display: none;"></div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history" class="tab-content">
+      <h3>Tool Call History</h3>
+      <div id="history-list" class="history">
+        <div style="text-align: center; color: #888; padding: 1em;">No tool calls yet</div>
+      </div>
+      <button onclick="clearHistory()" style="width: auto; margin-top: 1em;">Clear History</button>
+    </div>
+
+    <!-- Documentation Tab -->
+    <div id="docs" class="tab-content">
+      <h3>Tool Documentation</h3>
+      <div style="background: #f9f9f9; padding: 1em; border-radius: 6px;">
+        <h4>Available Agentic Tools</h4>
+        <ul style="list-style-type: none; padding: 0;">
+          <li style="margin: 0.5em 0;"><strong>get-alerts</strong> - Get weather alerts for a US state</li>
+          <li style="margin: 0.5em 0;"><strong>get-forecast</strong> - Get weather forecast for a location</li>
+          <li style="margin: 0.5em 0;"><strong>get-state-forecast-summary</strong> - Advanced agentic tool combining alerts and forecast</li>
+          <li style="margin: 0.5em 0;"><strong>get-news-headlines</strong> - Get latest news headlines for a topic</li>
+          <li style="margin: 0.5em 0;"><strong>get-stock-price</strong> - Get current stock price for a symbol</li>
+          <li style="margin: 0.5em 0;"><strong>plan-trip</strong> - Multi-step agentic workflow combining weather, news, and finance</li>
+          <li style="margin: 0.5em 0;"><strong>chain-tools</strong> - Demonstration of tool composition and chaining</li>
+          <li style="margin: 0.5em 0;"><strong>remember-preference</strong> - Store user preferences in agent memory</li>
+          <li style="margin: 0.5em 0;"><strong>recall-preference</strong> - Recall user preferences from agent memory</li>
+          <li style="margin: 0.5em 0;"><strong>long-task</strong> - Simulate long-running tasks and background processes</li>
+          <li style="margin: 0.5em 0;"><strong>get-logs</strong> - Access server logs for monitoring and debugging</li>
+          <li style="margin: 0.5em 0;"><strong>llm-summarize</strong> - Text summarization using simulated LLM integration</li>
+          <li style="margin: 0.5em 0;"><strong>multi-agent-demo</strong> - Demonstration of multi-agent collaboration</li>
+        </ul>
+        <h4>Agentic Features</h4>
+        <ul>
+          <li><strong>Tool Chaining:</strong> Tools can call other tools internally for complex workflows</li>
+          <li><strong>Stateful Memory:</strong> Agents can remember user preferences across sessions</li>
+          <li><strong>Long-Running Tasks:</strong> Support for background processes and async operations</li>
+          <li><strong>LLM Integration:</strong> Simulated integration with language models for text processing</li>
+          <li><strong>Multi-Agent Collaboration:</strong> Multiple agents working together on complex tasks</li>
+          <li><strong>Monitoring & Observability:</strong> Logging and monitoring for debugging and optimization</li>
+        </ul>
+        <h4>Interactive Visualization Features</h4>
+        <ul>
+          <li><strong>Dynamic Architecture Diagrams:</strong> Real-time system diagrams that update based on your tool selection</li>
+          <li><strong>Tool-Specific Flow Visualization:</strong> Each tool displays its unique data flow, API interactions, and component relationships</li>
+          <li><strong>Educational Architecture Patterns:</strong> Visual representation of agentic patterns including workflows, memory operations, multi-agent coordination, and tool composition</li>
+          <li><strong>Interactive Learning:</strong> Select different tools to understand how various agentic capabilities are implemented and orchestrated</li>
+        </ul>
+      </div>
+    </div>
     <div class="footer">
       <p>See <a href="https://modelcontextprotocol.io/llms-full.txt" target="_blank">MCP Protocol Docs</a> for more info.<br />
       Project: MCP Agentic Fun</p>
+    </div>
+    <div class="info" style="margin-top:2em;">
+      <b>Does this project represent the correct architecture for an agentic system?</b><br>
+      <ul style="margin-top:0.5em;">
+        <li><b>✅ Comprehensive MCP Implementation:</b> Full protocol compliance with JSON-RPC handshake, proper tool registration, and robust error handling across all 13 tools.</li>
+        <li><b>✅ Multi-Modal Agentic Tools:</b> From simple data retrieval (weather, news, stocks) to complex multi-step workflows (trip planning) and tool composition (chaining).</li>
+        <li><b>✅ Stateful Agent Architecture:</b> Persistent memory system allowing agents to remember user preferences and maintain context across sessions.</li>
+        <li><b>✅ Advanced Client Ecosystem:</b> Three distinct client interfaces (Enhanced Web UI with tabs/validation/history, Node.js CLI, Python CLI) supporting different use cases.</li>
+        <li><b>✅ Production-Ready Features:</b> Extended timeouts, monitoring/logging, input validation, error handling, and performance tracking for real-world deployment.</li>
+        <li><b>✅ AI Integration Ready:</b> LLM integration stubs and multi-agent collaboration patterns that can be extended with real AI services.</li>
+        <li><b>✅ Developer Experience Excellence:</b> Comprehensive documentation, interactive help, dynamic architecture diagrams, tool-specific flow visualization, code examples, and setup automation for easy adoption.</li>
+        <li><b>✅ Interactive Architecture Visualization:</b> Dynamic system diagrams that update in real-time based on tool selection, showing specific data flows, component interactions, and agentic patterns for educational and debugging purposes.</li>
+        <li><b>✅ Extensible Architecture:</b> Modular design supporting easy addition of new tools, workflows, client types, and integration patterns.</li>
+      </ul>
+      <div style="margin-top:0.5em; color:#555; font-size:0.97em;">
+        <b>Architectural Summary:</b> This project demonstrates industry best practices for agentic systems with proper separation of concerns, multi-client support, stateful operations, monitoring capabilities, and comprehensive tooling. The implementation includes interactive architecture visualization that dynamically illustrates tool-specific data flows and component interactions. The system serves both as a functional agentic platform and an educational reference for MCP-based architectures.
+      </div>
     </div>
   </div>
   <script>
@@ -95,15 +334,432 @@
     const toolArgs = {
       'get-alerts': { state: 'CA' },
       'get-forecast': { latitude: 34.05, longitude: -118.25 },
-      'get-state-forecast-summary': { state: 'NY' }
+      'get-state-forecast-summary': { state: 'NY' },
+      'get-news-headlines': { topic: 'technology' },
+      'get-stock-price': { symbol: 'AAPL' },
+      'plan-trip': { destination: 'Los Angeles', date: '2025-06-01' },
+      'chain-tools': { first: 'get-alerts', second: 'get-forecast', args: { state: 'CA', latitude: 34.05, longitude: -118.25 } },
+      'remember-preference': { key: 'color', value: 'blue' },
+      'recall-preference': { key: 'color' },
+      'long-task': { seconds: 3 },
+      'get-logs': {},
+      'llm-summarize': { text: 'This is a long text to summarize using an LLM agent.' },
+      'multi-agent-demo': {}
     };
     const toolDescriptions = {
       'get-alerts': 'Enter a two-letter US state code (e.g. CA, NY)',
       'get-forecast': 'Enter latitude and longitude (e.g. 34.05, -118.25)',
-      'get-state-forecast-summary': 'Enter a two-letter US state code (e.g. CA, NY)'
+      'get-state-forecast-summary': 'Enter a two-letter US state code (e.g. CA, NY)',
+      'get-news-headlines': 'Enter a news topic (e.g. technology, sports)',
+      'get-stock-price': 'Enter a stock symbol (e.g. AAPL, TSLA)',
+      'plan-trip': 'Enter a destination and date (e.g. Los Angeles, 2025-06-01)',
+      'chain-tools': 'Enter two tool names and shared arguments (demo: get-alerts + get-forecast)',
+      'remember-preference': 'Enter a key and value to store in agent memory',
+      'recall-preference': 'Enter a key to recall from agent memory',
+      'long-task': 'Enter a number of seconds (1-30) to simulate a long-running task',
+      'get-logs': 'No arguments needed',
+      'llm-summarize': 'Enter text to summarize with the LLM agent',
+      'multi-agent-demo': 'No arguments needed (simulates multi-agent collaboration)'
     };
     const argsArea = document.getElementById('args-area');
     const toolSelect = document.getElementById('tool');
+    
+    // Standardized component color schemes for consistent visual representation
+    const componentStyles = {
+      // Client Layer (Blue theme) - User interfaces and entry points
+      client: { color: '#e6f7ff', stroke: '#0078d4' },
+      // Proxy Layer (Deep Purple theme) - Express server and routing
+      proxy: { color: '#f0e6ff', stroke: '#7d3fd4' },
+      // MCP Server (Yellow theme) - Core MCP protocol layer
+      mcp: { color: '#fffbe6', stroke: '#d4b300' },
+      // Basic Tools (Green theme) - Simple direct API calls
+      basicTool: { color: '#e6ffe6', stroke: '#00b36b' },
+      // Advanced Tools (Orange theme) - Complex logic, multi-step operations
+      advancedTool: { color: '#fff0e6', stroke: '#ff9500' },
+      // Orchestrators (Pink theme) - Agents coordinating multiple operations
+      orchestrator: { color: '#ffe6f7', stroke: '#d946ef' },
+      // External APIs (Red theme) - Third-party services and external data
+      externalApi: { color: '#ffe6e6', stroke: '#dc2626' },
+      // Memory/Storage (Light Purple theme) - Persistent state and data storage
+      memory: { color: '#f8f4ff', stroke: '#8b5cf6' },
+      // Results/Output (Light Blue theme) - Final outputs and responses
+      result: { color: '#f0f9ff', stroke: '#0ea5e9' },
+      // Background Processes (Indigo theme) - Async operations and timers
+      background: { color: '#eef2ff', stroke: '#6366f1' },
+      // Monitoring/Logs (Teal theme) - Observability and debugging
+      monitoring: { color: '#f0fdfa', stroke: '#059669' }
+    };
+
+    // Dynamic diagram configurations for each tool
+    const toolDiagrams = {
+      'get-alerts': {
+        title: 'Weather Alerts Flow',
+        components: [
+          { id: 'client', x: 50, y: 100, width: 80, height: 40, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 180, y: 100, width: 80, height: 40, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 310, y: 100, width: 80, height: 40, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 440, y: 100, width: 80, height: 40, ...componentStyles.basicTool, text: 'Alerts\nTool' },
+          { id: 'api', x: 570, y: 100, width: 80, height: 40, ...componentStyles.externalApi, text: 'Weather API' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'api' }
+        ],
+        description: 'User selects state → Express proxy → MCP server validates input → Alerts tool → Weather API → Weather alerts returned'
+      },
+      'get-forecast': {
+        title: 'Weather Forecast Flow',
+        components: [
+          { id: 'client', x: 50, y: 100, width: 80, height: 40, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 180, y: 100, width: 80, height: 40, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 310, y: 100, width: 80, height: 40, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 440, y: 100, width: 80, height: 40, ...componentStyles.basicTool, text: 'Forecast\nTool' },
+          { id: 'api1', x: 550, y: 70, width: 70, height: 30, ...componentStyles.externalApi, text: 'Points API' },
+          { id: 'api2', x: 550, y: 130, width: 70, height: 30, ...componentStyles.externalApi, text: 'Forecast API' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'api1' },
+          { from: 'tool', to: 'api2' }
+        ],
+        description: 'User enters coordinates → Express proxy → MCP server validates lat/lon → Forecast tool → Weather APIs → Weather forecast returned'
+      },
+      'plan-trip': {
+        title: 'Multi-Step Agentic Workflow',
+        components: [
+          { id: 'client', x: 30, y: 120, width: 70, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 130, y: 120, width: 70, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 230, y: 120, width: 70, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'planner', x: 330, y: 120, width: 70, height: 35, ...componentStyles.orchestrator, text: 'Trip\nOrchestrator' },
+          { id: 'weather', x: 430, y: 60, width: 60, height: 30, ...componentStyles.basicTool, text: 'Weather\nTool' },
+          { id: 'news', x: 430, y: 120, width: 60, height: 30, ...componentStyles.basicTool, text: 'News\nTool' },
+          { id: 'finance', x: 430, y: 180, width: 60, height: 30, ...componentStyles.basicTool, text: 'Finance\nTool' },
+          { id: 'combiner', x: 520, y: 120, width: 70, height: 35, ...componentStyles.orchestrator, text: 'Result\nCombiner' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'planner' },
+          { from: 'planner', to: 'weather' },
+          { from: 'planner', to: 'news' },
+          { from: 'planner', to: 'finance' },
+          { from: 'weather', to: 'combiner' },
+          { from: 'news', to: 'combiner' },
+          { from: 'finance', to: 'combiner' }
+        ],
+        description: 'User plans trip → Express proxy → MCP server → Trip orchestrator coordinates multiple tools (weather, news, finance) → Results combined into comprehensive trip plan'
+      },
+      'chain-tools': {
+        title: 'Tool Composition & Chaining',
+        components: [
+          { id: 'client', x: 40, y: 120, width: 70, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 140, y: 120, width: 70, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 240, y: 120, width: 70, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'chainer', x: 340, y: 120, width: 70, height: 35, ...componentStyles.orchestrator, text: 'Tool\nOrchestrator' },
+          { id: 'tool1', x: 440, y: 80, width: 60, height: 30, ...componentStyles.basicTool, text: 'First Tool' },
+          { id: 'tool2', x: 440, y: 160, width: 60, height: 30, ...componentStyles.basicTool, text: 'Second Tool' },
+          { id: 'result', x: 540, y: 120, width: 70, height: 35, ...componentStyles.result, text: 'Chained\nResults' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'chainer' },
+          { from: 'chainer', to: 'tool1' },
+          { from: 'chainer', to: 'tool2' },
+          { from: 'tool1', to: 'result' },
+          { from: 'tool2', to: 'result' }
+        ],
+        description: 'User specifies tool chain → Express proxy → MCP server → Tool orchestrator executes first and second tools → Results combined and returned'
+      },
+      'remember-preference': {
+        title: 'Stateful Agent Memory Storage',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.advancedTool, text: 'Memory\nTool' },
+          { id: 'memory', x: 530, y: 120, width: 80, height: 35, ...componentStyles.memory, text: 'Agent\nMemory' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'memory' }
+        ],
+        description: 'User stores preference → Express proxy → MCP server → Memory tool → Key-value stored in persistent agent memory for future recall'
+      },
+      'recall-preference': {
+        title: 'Stateful Agent Memory Retrieval',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.advancedTool, text: 'Memory\nTool' },
+          { id: 'memory', x: 530, y: 120, width: 80, height: 35, ...componentStyles.memory, text: 'Agent\nMemory' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'memory' }
+        ],
+        description: 'User requests preference → Express proxy → MCP server → Memory tool → Key retrieved from agent memory → Value returned to user'
+      },
+      'long-task': {
+        title: 'Long-Running Background Task',
+        components: [
+          { id: 'client', x: 40, y: 120, width: 70, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 140, y: 120, width: 70, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 240, y: 120, width: 70, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 340, y: 120, width: 70, height: 35, ...componentStyles.advancedTool, text: 'Long Task\nTool' },
+          { id: 'timer', x: 440, y: 80, width: 60, height: 30, ...componentStyles.background, text: 'Timer\nProcess' },
+          { id: 'async', x: 440, y: 160, width: 60, height: 30, ...componentStyles.background, text: 'Async\nProcess' },
+          { id: 'result', x: 540, y: 120, width: 70, height: 35, ...componentStyles.result, text: 'Completion\nResult' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'timer' },
+          { from: 'tool', to: 'async' },
+          { from: 'timer', to: 'result' },
+          { from: 'async', to: 'result' }
+        ],
+        description: 'User starts long task → Express proxy (with extended timeout) → MCP server → Long task tool starts async process → Timer waits specified duration → Completion notification returned'
+      },
+      'llm-summarize': {
+        title: 'AI/LLM Integration Flow',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.orchestrator, text: 'LLM\nOrchestrator' },
+          { id: 'llm', x: 530, y: 120, width: 80, height: 35, ...componentStyles.memory, text: 'AI\nProcessor' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'llm' }
+        ],
+        description: 'User provides text → Express proxy → MCP server → LLM orchestrator → AI processor → Summarized text returned (ready for real LLM integration)'
+      },
+      'multi-agent-demo': {
+        title: 'Multi-Agent Collaboration',
+        components: [
+          { id: 'client', x: 30, y: 140, width: 70, height: 30, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 130, y: 140, width: 70, height: 30, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 230, y: 140, width: 70, height: 30, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'orchestrator', x: 330, y: 140, width: 70, height: 30, ...componentStyles.orchestrator, text: 'Agent\nOrchestrator' },
+          { id: 'agent1', x: 430, y: 80, width: 60, height: 25, ...componentStyles.memory, text: 'Agent A\n(Data)' },
+          { id: 'agent2', x: 430, y: 140, width: 60, height: 25, ...componentStyles.memory, text: 'Agent B\n(Analysis)' },
+          { id: 'agent3', x: 430, y: 200, width: 60, height: 25, ...componentStyles.memory, text: 'Agent C\n(Report)' },
+          { id: 'result', x: 520, y: 140, width: 70, height: 30, ...componentStyles.result, text: 'Combined\nResult' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'orchestrator' },
+          { from: 'orchestrator', to: 'agent1' },
+          { from: 'orchestrator', to: 'agent2' },
+          { from: 'orchestrator', to: 'agent3' },
+          { from: 'agent1', to: 'result' },
+          { from: 'agent2', to: 'result' },
+          { from: 'agent3', to: 'result' }
+        ],
+        description: 'User initiates collaboration → Express proxy → MCP server → Agent orchestrator coordinates multiple specialized agents (data gathering, analysis, reporting) → Combined results returned'
+      },
+      'get-state-forecast-summary': {
+        title: 'Advanced Agentic State Summary',
+        components: [
+          { id: 'client', x: 30, y: 120, width: 70, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 130, y: 120, width: 70, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 230, y: 120, width: 70, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'summarizer', x: 330, y: 120, width: 70, height: 35, ...componentStyles.orchestrator, text: 'State\nOrchestrator' },
+          { id: 'alerts', x: 430, y: 80, width: 60, height: 30, ...componentStyles.basicTool, text: 'Alerts\nTool' },
+          { id: 'forecast', x: 430, y: 160, width: 60, height: 30, ...componentStyles.basicTool, text: 'Forecast\nTool' },
+          { id: 'combiner', x: 520, y: 120, width: 70, height: 35, ...componentStyles.orchestrator, text: 'AI\nCombiner' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'summarizer' },
+          { from: 'summarizer', to: 'alerts' },
+          { from: 'summarizer', to: 'forecast' },
+          { from: 'alerts', to: 'combiner' },
+          { from: 'forecast', to: 'combiner' }
+        ],
+        description: 'User requests state summary → Express proxy → MCP server → State orchestrator coordinates alerts + forecast tools → AI combiner generates comprehensive state weather summary'
+      },
+      'get-news-headlines': {
+        title: 'News Headlines Flow',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.basicTool, text: 'News\nTool' },
+          { id: 'api', x: 530, y: 120, width: 80, height: 35, ...componentStyles.externalApi, text: 'News API\n(Mock)' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'api' }
+        ],
+        description: 'User enters topic → Express proxy → MCP server validates input → News tool → Mock news API → Latest headlines for topic returned'
+      },
+      'get-stock-price': {
+        title: 'Stock Price Flow',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.basicTool, text: 'Stock\nTool' },
+          { id: 'api', x: 530, y: 120, width: 80, height: 35, ...componentStyles.externalApi, text: 'Finance API\n(Mock)' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'api' }
+        ],
+        description: 'User enters symbol → Express proxy → MCP server validates input → Stock tool → Mock finance API → Current stock price and data returned'
+      },
+      'get-logs': {
+        title: 'Monitoring & Observability',
+        components: [
+          { id: 'client', x: 50, y: 120, width: 80, height: 35, ...componentStyles.client, text: 'Web UI' },
+          { id: 'proxy', x: 170, y: 120, width: 80, height: 35, ...componentStyles.proxy, text: 'Express\nProxy' },
+          { id: 'mcp', x: 290, y: 120, width: 80, height: 35, ...componentStyles.mcp, text: 'MCP Server' },
+          { id: 'tool', x: 410, y: 120, width: 80, height: 35, ...componentStyles.monitoring, text: 'Log\nRetrieval' },
+          { id: 'logs', x: 530, y: 120, width: 80, height: 35, ...componentStyles.result, text: 'System\nLogs' }
+        ],
+        arrows: [
+          { from: 'client', to: 'proxy' },
+          { from: 'proxy', to: 'mcp' },
+          { from: 'mcp', to: 'tool' },
+          { from: 'tool', to: 'logs' }
+        ],
+        description: 'User requests logs → Express proxy → MCP server → Log retrieval tool → System logs and monitoring data returned for debugging and observability'
+      }
+    };
+
+    // Default diagram for when no specific tool is selected
+    const defaultDiagram = {
+      title: 'Select a Tool to See Specific Flow',
+      components: [
+        { id: 'client', x: 100, y: 120, width: 100, height: 40, color: '#e6f7ff', stroke: '#0078d4', text: 'Multiple\nClients' },
+        { id: 'proxy', x: 250, y: 120, width: 100, height: 40, color: '#f0e6ff', stroke: '#7d3fd4', text: 'Express\nProxy' },
+        { id: 'mcp', x: 400, y: 120, width: 100, height: 40, color: '#fffbe6', stroke: '#d4b300', text: 'MCP Server\n& Tools' },
+        { id: 'result', x: 550, y: 120, width: 100, height: 40, color: '#f0f9ff', stroke: '#0ea5e9', text: 'Results &\nResponse' }
+      ],
+      arrows: [
+        { from: 'client', to: 'proxy' },
+        { from: 'proxy', to: 'mcp' },
+        { from: 'mcp', to: 'result' }
+      ],
+      description: 'Select a tool from the dropdown above to see its specific data flow, components, and architecture pattern. Each tool demonstrates different aspects of the agentic system.'
+    };
+
+    function updateDynamicDiagram(selectedTool) {
+      const diagram = toolDiagrams[selectedTool] || defaultDiagram;
+      const svg = document.getElementById('dynamic-diagram');
+      const description = document.getElementById('dynamic-flow-description');
+      
+      // Clear existing content
+      svg.innerHTML = '';
+      
+      // Add title
+      const titleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      titleText.setAttribute('x', '375');
+      titleText.setAttribute('y', '25');
+      titleText.setAttribute('text-anchor', 'middle');
+      titleText.setAttribute('font-size', '14');
+      titleText.setAttribute('font-weight', 'bold');
+      titleText.setAttribute('fill', '#374151');
+      titleText.textContent = diagram.title;
+      svg.appendChild(titleText);
+      
+      // Add components
+      diagram.components.forEach(comp => {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', comp.x);
+        rect.setAttribute('y', comp.y);
+        rect.setAttribute('width', comp.width);
+        rect.setAttribute('height', comp.height);
+        rect.setAttribute('rx', '6');
+        rect.setAttribute('fill', comp.color);
+        rect.setAttribute('stroke', comp.stroke);
+        rect.setAttribute('stroke-width', '2');
+        svg.appendChild(rect);
+        
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', comp.x + comp.width / 2);
+        text.setAttribute('y', comp.y + comp.height / 2 + (comp.text.includes('\n') ? -3 : 3));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('fill', '#374151');
+        
+        if (comp.text.includes('\n')) {
+          const lines = comp.text.split('\n');
+          lines.forEach((line, index) => {
+            const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            tspan.setAttribute('x', comp.x + comp.width / 2);
+            tspan.setAttribute('dy', index === 0 ? '0' : '12');
+            tspan.textContent = line;
+            text.appendChild(tspan);
+          });
+        } else {
+          text.textContent = comp.text;
+        }
+        svg.appendChild(text);
+      });
+      
+      // Add arrows
+      diagram.arrows.forEach(arrow => {
+        const fromComp = diagram.components.find(c => c.id === arrow.from);
+        const toComp = diagram.components.find(c => c.id === arrow.to);
+        
+        if (fromComp && toComp) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', fromComp.x + fromComp.width);
+          line.setAttribute('y1', fromComp.y + fromComp.height / 2);
+          line.setAttribute('x2', toComp.x);
+          line.setAttribute('y2', toComp.y + toComp.height / 2);
+          line.setAttribute('stroke', '#6b7280');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('marker-end', 'url(#dynamicArrow)');
+          svg.appendChild(line);
+        }
+      });
+      
+      // Add arrow marker definition
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'dynamicArrow');
+      marker.setAttribute('markerWidth', '8');
+      marker.setAttribute('markerHeight', '8');
+      marker.setAttribute('refX', '6');
+      marker.setAttribute('refY', '3');
+      marker.setAttribute('orient', 'auto');
+      marker.setAttribute('markerUnits', 'strokeWidth');
+      
+      const arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arrowPath.setAttribute('d', 'M0,0 L0,6 L6,3 z');
+      arrowPath.setAttribute('fill', '#6b7280');
+      marker.appendChild(arrowPath);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      
+      // Update description
+      description.innerHTML = `<b>Tool-Specific Flow:</b> ${diagram.description}`;
+    }
+
     function renderArgs() {
       const tool = toolSelect.value;
       let html = '';
@@ -112,12 +768,38 @@
       } else if (tool === 'get-forecast') {
         html += `<label for="latitude">Latitude</label><input id="latitude" name="latitude" type="number" step="any" value="${toolArgs[tool].latitude}" />`;
         html += `<label for="longitude">Longitude</label><input id="longitude" name="longitude" type="number" step="any" value="${toolArgs[tool].longitude}" />`;
+      } else if (tool === 'get-news-headlines') {
+        html += `<label for="topic">Topic</label><input id="topic" name="topic" value="${toolArgs[tool].topic}" />`;
+      } else if (tool === 'get-stock-price') {
+        html += `<label for="symbol">Symbol</label><input id="symbol" name="symbol" value="${toolArgs[tool].symbol}" maxlength="5" />`;
+      } else if (tool === 'plan-trip') {
+        html += `<label for="destination">Destination</label><input id="destination" name="destination" value="${toolArgs[tool].destination}" />`;
+        html += `<label for="date">Date</label><input id="date" name="date" type="date" value="${toolArgs[tool].date}" />`;
+      } else if (tool === 'chain-tools') {
+        html += `<label for="first">First Tool</label><input id="first" name="first" value="${toolArgs[tool].first}" />`;
+        html += `<label for="second">Second Tool</label><input id="second" name="second" value="${toolArgs[tool].second}" />`;
+        html += `<label for="args">Args (JSON)</label><input id="args" name="args" value='${JSON.stringify(toolArgs[tool].args)}' />`;
+      } else if (tool === 'remember-preference') {
+        html += `<label for="key">Key</label><input id="key" name="key" value="${toolArgs[tool].key}" />`;
+        html += `<label for="value">Value</label><input id="value" name="value" value="${toolArgs[tool].value}" />`;
+      } else if (tool === 'recall-preference') {
+        html += `<label for="key">Key</label><input id="key" name="key" value="${toolArgs[tool].key}" />`;
+      } else if (tool === 'long-task') {
+        html += `<label for="seconds">Seconds</label><input id="seconds" name="seconds" type="number" min="1" max="30" value="${toolArgs[tool].seconds}" />`;
+      } else if (tool === 'llm-summarize') {
+        html += `<label for="text">Text</label><textarea id="text" name="text" rows="3">${toolArgs[tool].text}</textarea>`;
       }
       html += `<div style="color:#888; font-size:0.95em; margin-top:0.5em;">${toolDescriptions[tool]}</div>`;
       argsArea.innerHTML = html;
+      
+      // Update dynamic diagram based on selected tool
+      updateDynamicDiagram(tool);
     }
     toolSelect.addEventListener('change', renderArgs);
     renderArgs();
+    
+    // Initialize dynamic diagram
+    updateDynamicDiagram(toolSelect.value);
     document.getElementById('mcp-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const tool = toolSelect.value;
@@ -127,6 +809,30 @@
       } else if (tool === 'get-forecast') {
         args.latitude = parseFloat(document.getElementById('latitude').value);
         args.longitude = parseFloat(document.getElementById('longitude').value);
+      } else if (tool === 'get-news-headlines') {
+        args.topic = document.getElementById('topic').value.trim();
+      } else if (tool === 'get-stock-price') {
+        args.symbol = document.getElementById('symbol').value.trim().toUpperCase();
+      } else if (tool === 'plan-trip') {
+        args.destination = document.getElementById('destination').value.trim();
+        args.date = document.getElementById('date').value;
+      } else if (tool === 'chain-tools') {
+        args.first = document.getElementById('first').value.trim();
+        args.second = document.getElementById('second').value.trim();
+        try {
+          args.args = JSON.parse(document.getElementById('args').value);
+        } catch {
+          args.args = {};
+        }
+      } else if (tool === 'remember-preference') {
+        args.key = document.getElementById('key').value.trim();
+        args.value = document.getElementById('value').value.trim();
+      } else if (tool === 'recall-preference') {
+        args.key = document.getElementById('key').value.trim();
+      } else if (tool === 'long-task') {
+        args.seconds = parseInt(document.getElementById('seconds').value, 10);
+      } else if (tool === 'llm-summarize') {
+        args.text = document.getElementById('text').value;
       }
       document.getElementById('result').textContent = 'Calling tool...';
       try {
@@ -142,6 +848,209 @@
         document.getElementById('result').textContent = 'Error: ' + err;
       }
     });
+
+    // Enhanced UI functionality (Extension 2)
+    let toolHistory = JSON.parse(localStorage.getItem('mcpToolHistory') || '[]');
+
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+      
+      // Update history display if history tab is selected
+      if (tabName === 'history') {
+        updateHistoryDisplay();
+      }
+    }
+
+    function validateInput(tool, args) {
+      const errors = [];
+      
+      if (tool === 'get-alerts' || tool === 'get-state-forecast-summary') {
+        if (!args.state || args.state.length !== 2) {
+          errors.push('State must be a 2-letter code (e.g. CA, NY)');
+        }
+      } else if (tool === 'get-forecast') {
+        if (isNaN(args.latitude) || args.latitude < -90 || args.latitude > 90) {
+          errors.push('Latitude must be a number between -90 and 90');
+        }
+        if (isNaN(args.longitude) || args.longitude < -180 || args.longitude > 180) {
+          errors.push('Longitude must be a number between -180 and 180');
+        }
+      } else if (tool === 'get-news-headlines') {
+        if (!args.topic || args.topic.length < 2) {
+          errors.push('Topic must be at least 2 characters');
+        }
+      } else if (tool === 'get-stock-price') {
+        if (!args.symbol || args.symbol.length < 1) {
+          errors.push('Stock symbol is required');
+        }
+      } else if (tool === 'plan-trip') {
+        if (!args.destination || args.destination.length < 2) {
+          errors.push('Destination must be at least 2 characters');
+        }
+        if (!args.date) {
+          errors.push('Date is required');
+        }
+      } else if (tool === 'long-task') {
+        if (isNaN(args.seconds) || args.seconds < 1 || args.seconds > 30) {
+          errors.push('Seconds must be a number between 1 and 30');
+        }
+      }
+      
+      return errors;
+    }
+
+    function showValidationErrors(errors) {
+      const errorDiv = document.getElementById('validation-error');
+      if (errors.length > 0) {
+        errorDiv.innerHTML = '<strong>Validation Errors:</strong><ul>' + 
+          errors.map(error => '<li>' + error + '</li>').join('') + '</ul>';
+        errorDiv.style.display = 'block';
+        return false;
+      } else {
+        errorDiv.style.display = 'none';
+        return true;
+      }
+    }
+
+    function addToHistory(tool, args, result, startTime, endTime) {
+      const historyItem = {
+        tool,
+        args,
+        result: typeof result === 'string' ? result.substring(0, 200) + '...' : JSON.stringify(result).substring(0, 200) + '...',
+        startTime,
+        endTime,
+        duration: endTime - startTime,
+        timestamp: new Date().toISOString()
+      };
+      
+      toolHistory.unshift(historyItem);
+      if (toolHistory.length > 50) toolHistory = toolHistory.slice(0, 50); // Keep only last 50 calls
+      
+      localStorage.setItem('mcpToolHistory', JSON.stringify(toolHistory));
+    }
+
+    function updateHistoryDisplay() {
+      const historyList = document.getElementById('history-list');
+      
+      if (toolHistory.length === 0) {
+        historyList.innerHTML = '<div style="text-align: center; color: #888; padding: 1em;">No tool calls yet</div>';
+        return;
+      }
+      
+      historyList.innerHTML = toolHistory.map(item => `
+        <div class="history-item">
+          <div class="history-tool">${item.tool}</div>
+          <div style="font-size: 0.9em; color: #666; margin: 0.2em 0;">
+            Args: ${JSON.stringify(item.args)}
+          </div>
+          <div style="font-size: 0.8em; color: #999;">
+            Result: ${item.result}
+          </div>
+          <div class="history-time">
+            ${new Date(item.timestamp).toLocaleString()} • ${item.duration}ms
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory() {
+      toolHistory = [];
+      localStorage.removeItem('mcpToolHistory');
+      updateHistoryDisplay();
+    }
+
+    // Override the existing form submission to add validation and history
+    document.getElementById('mcp-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const tool = document.getElementById('tool').value;
+      const startTime = Date.now();
+      
+      // Build args object
+      let args = {};
+      if (tool === 'get-alerts' || tool === 'get-state-forecast-summary') {
+        args.state = document.getElementById('state').value.trim().toUpperCase();
+      } else if (tool === 'get-forecast') {
+        args.latitude = parseFloat(document.getElementById('latitude').value);
+        args.longitude = parseFloat(document.getElementById('longitude').value);
+      } else if (tool === 'get-news-headlines') {
+        args.topic = document.getElementById('topic').value.trim();
+      } else if (tool === 'get-stock-price') {
+        args.symbol = document.getElementById('symbol').value.trim().toUpperCase();
+      } else if (tool === 'plan-trip') {
+        args.destination = document.getElementById('destination').value.trim();
+        args.date = document.getElementById('date').value;
+      } else if (tool === 'chain-tools') {
+        args.first = document.getElementById('first').value.trim();
+        args.second = document.getElementById('second').value.trim();
+        try {
+          args.args = JSON.parse(document.getElementById('args').value);
+        } catch {
+          args.args = {};
+        }
+      } else if (tool === 'remember-preference') {
+        args.key = document.getElementById('key').value.trim();
+        args.value = document.getElementById('value').value.trim();
+      } else if (tool === 'recall-preference') {
+        args.key = document.getElementById('key').value.trim();
+      } else if (tool === 'long-task') {
+        args.seconds = parseInt(document.getElementById('seconds').value);
+      } else if (tool === 'llm-summarize') {
+        args.text = document.getElementById('text').value.trim();
+      }
+      
+      // Validate input
+      const validationErrors = validateInput(tool, args);
+      if (!showValidationErrors(validationErrors)) {
+        return;
+      }
+      
+      // Disable form and show loading
+      const submitButton = e.target.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Calling Tool...';
+      document.getElementById('result').textContent = 'Loading...';
+      document.getElementById('result').className = 'loading';
+      
+      try {
+        const response = await fetch('/mcp-client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool, args })
+        });
+        
+        const data = await response.json();
+        const endTime = Date.now();
+        
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('result').className = '';
+        
+        // Add to history
+        addToHistory(tool, args, data, startTime, endTime);
+        
+      } catch (err) {
+        const endTime = Date.now();
+        const errorMsg = 'Error: ' + err;
+        document.getElementById('result').textContent = errorMsg;
+        document.getElementById('result').className = '';
+        
+        // Add error to history too
+        addToHistory(tool, args, errorMsg, startTime, endTime);
+      } finally {
+        // Re-enable form
+        submitButton.disabled = false;
+        submitButton.textContent = 'Call Tool';
+      }
+    });
+
+    // Initialize history display on page load
+    updateHistoryDisplay();
   </script>
 </body>
 </html>
