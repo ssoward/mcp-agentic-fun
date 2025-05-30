@@ -1,0 +1,147 @@
+<!--
+  MCP Agentic Fun UI
+  This web UI lets you interact with your local MCP server visually.
+  - Select a tool, enter arguments, and see results instantly.
+  - The UI sends your request to the Node.js backend, which launches the MCP server and returns the tool result.
+  - No data is sent to any external service; all processing is local.
+  - For more info, see the README.md and MCP Protocol documentation.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP Agentic Fun UI</title>
+  <style>
+    body { font-family: sans-serif; background: #f7f7fa; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 1.5em; font-weight: bold; }
+    select, input, textarea, button { width: 100%; margin-top: 0.5em; padding: 0.5em; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #0078d4; color: #fff; border: none; cursor: pointer; margin-top: 1.5em; }
+    button:hover { background: #005fa3; }
+    pre { background: #f4f4f4; padding: 1em; border-radius: 4px; overflow-x: auto; }
+    .footer { text-align: center; margin-top: 2em; color: #888; font-size: 0.9em; }
+    .info { background: #e6f7ff; border-left: 4px solid #0078d4; padding: 1em; margin-bottom: 1.5em; border-radius: 4px; color: #222; }
+    .diagram { background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 1em; margin-bottom: 1.5em; text-align: center; }
+    .diagram svg { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MCP Agentic Fun UI</h1>
+    <div class="info">
+      <b>How this works:</b><br>
+      This UI lets you call your local MCP server’s tools visually.<br>
+      <ul style="margin:0 0 0 1.2em;">
+        <li>Select a tool and enter its arguments.</li>
+        <li>Click <b>Call Tool</b> to send your request to the Node.js backend.</li>
+        <li>The backend launches the MCP server, calls the tool, and returns the result here.</li>
+        <li>All processing is local—no data leaves your machine.</li>
+      </ul>
+      <div style="margin-top:0.5em; font-size:0.95em; color:#555;">
+        For more details, see <code>README.md</code> and <a href="https://modelcontextprotocol.io/llms-full.txt" target="_blank">MCP Protocol Docs</a>.
+      </div>
+    </div>
+    <div class="diagram">
+      <b>System Interaction Diagram</b><br>
+      <svg width="500" height="180" viewBox="0 0 500 180">
+        <rect x="10" y="60" width="120" height="40" rx="8" fill="#e6f7ff" stroke="#0078d4" />
+        <text x="70" y="85" text-anchor="middle" font-size="15">Web UI</text>
+        <polygon points="130,80 170,80 170,90 130,90" fill="#0078d4" />
+        <rect x="170" y="60" width="120" height="40" rx="8" fill="#f0e6ff" stroke="#7d3fd4" />
+        <text x="230" y="85" text-anchor="middle" font-size="15">Node.js Backend</text>
+        <polygon points="290,80 330,80 330,90 290,90" fill="#7d3fd4" />
+        <rect x="330" y="60" width="120" height="40" rx="8" fill="#fffbe6" stroke="#d4b300" />
+        <text x="390" y="85" text-anchor="middle" font-size="15">MCP Server</text>
+        <polygon points="390,100 390,140 400,140 400,100" fill="#d4b300" />
+        <rect x="350" y="140" width="80" height="30" rx="6" fill="#e6ffe6" stroke="#00b36b" />
+        <text x="390" y="160" text-anchor="middle" font-size="13">Agentic Tools</text>
+        <text x="70" y="50" text-anchor="middle" font-size="12" fill="#0078d4">1. User input</text>
+        <text x="200" y="50" text-anchor="middle" font-size="12" fill="#7d3fd4">2. API call</text>
+        <text x="320" y="50" text-anchor="middle" font-size="12" fill="#d4b300">3. Tool call</text>
+        <text x="390" y="130" text-anchor="middle" font-size="12" fill="#00b36b">4. Agentic logic</text>
+        <text x="250" y="110" text-anchor="middle" font-size="12" fill="#888">Results flow back to UI</text>
+        <polyline points="390,140 390,100 330,80" fill="none" stroke="#00b36b" stroke-width="2" marker-end="url(#arrow)" />
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L10,5 L0,10 L2,5 z" fill="#00b36b" />
+          </marker>
+        </defs>
+      </svg>
+      <div style="font-size:0.95em; color:#555; margin-top:0.5em;">
+        <b>Flow:</b> Web UI → Node.js Backend → MCP Server → Agentic Tools → Results back to UI
+      </div>
+    </div>
+    <form id="mcp-form">
+      <label for="tool">Select Tool</label>
+      <select id="tool" name="tool">
+        <option value="get-alerts">get-alerts (Weather alerts for a US state)</option>
+        <option value="get-forecast">get-forecast (Weather forecast for a location)</option>
+        <option value="get-state-forecast-summary">get-state-forecast-summary (Advanced: alerts + forecast summary)</option>
+      </select>
+      <div id="args-area"></div>
+      <button type="submit">Call Tool</button>
+    </form>
+    <label for="result">Result</label>
+    <pre id="result">(Results will appear here)</pre>
+    <div class="footer">
+      <p>See <a href="https://modelcontextprotocol.io/llms-full.txt" target="_blank">MCP Protocol Docs</a> for more info.<br />
+      Project: MCP Agentic Fun</p>
+    </div>
+  </div>
+  <script>
+    // Tool argument templates
+    const toolArgs = {
+      'get-alerts': { state: 'CA' },
+      'get-forecast': { latitude: 34.05, longitude: -118.25 },
+      'get-state-forecast-summary': { state: 'NY' }
+    };
+    const toolDescriptions = {
+      'get-alerts': 'Enter a two-letter US state code (e.g. CA, NY)',
+      'get-forecast': 'Enter latitude and longitude (e.g. 34.05, -118.25)',
+      'get-state-forecast-summary': 'Enter a two-letter US state code (e.g. CA, NY)'
+    };
+    const argsArea = document.getElementById('args-area');
+    const toolSelect = document.getElementById('tool');
+    function renderArgs() {
+      const tool = toolSelect.value;
+      let html = '';
+      if (tool === 'get-alerts' || tool === 'get-state-forecast-summary') {
+        html += `<label for="state">State</label><input id="state" name="state" value="${toolArgs[tool].state}" maxlength="2" />`;
+      } else if (tool === 'get-forecast') {
+        html += `<label for="latitude">Latitude</label><input id="latitude" name="latitude" type="number" step="any" value="${toolArgs[tool].latitude}" />`;
+        html += `<label for="longitude">Longitude</label><input id="longitude" name="longitude" type="number" step="any" value="${toolArgs[tool].longitude}" />`;
+      }
+      html += `<div style="color:#888; font-size:0.95em; margin-top:0.5em;">${toolDescriptions[tool]}</div>`;
+      argsArea.innerHTML = html;
+    }
+    toolSelect.addEventListener('change', renderArgs);
+    renderArgs();
+    document.getElementById('mcp-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const tool = toolSelect.value;
+      let args = {};
+      if (tool === 'get-alerts' || tool === 'get-state-forecast-summary') {
+        args.state = document.getElementById('state').value.trim().toUpperCase();
+      } else if (tool === 'get-forecast') {
+        args.latitude = parseFloat(document.getElementById('latitude').value);
+        args.longitude = parseFloat(document.getElementById('longitude').value);
+      }
+      document.getElementById('result').textContent = 'Calling tool...';
+      try {
+        // Call the backend (Node.js server)
+        const res = await fetch('/mcp-client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool, args })
+        });
+        const data = await res.json();
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('result').textContent = 'Error: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
