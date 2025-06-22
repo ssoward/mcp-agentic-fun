@@ -1,11 +1,20 @@
 // Simple Express server to serve the UI and proxy MCP tool calls
 // Use CommonJS syntax for compatibility with 'type': 'module' in package.json
 const express = require("express");
+const https = require("https");
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const { spawn } = require("child_process");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(".")); // Serve ui.html and static files
+app.use(express.static(".")); // Serve static files
+
+// Route for root URL - serve landing page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.post("/mcp-client", (req, res) => {
   const { tool, args } = req.body;
@@ -199,7 +208,71 @@ app.get("/api/tools", (req, res) => {
   res.json(tools);
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`MCP Agentic Development Platform UI running at http://localhost:${PORT}/ui.html`);
+// SSL Certificate paths (enhanced certificates with SAN)
+const certPath = path.join(__dirname, 'ssl', 'cert.pem');
+const keyPath = path.join(__dirname, 'ssl', 'key.pem');
+
+// Function to create enhanced self-signed certificate
+function createSelfSignedCert() {
+  const sslDir = path.join(__dirname, 'ssl');
+  
+  if (!fs.existsSync(sslDir)) {
+    fs.mkdirSync(sslDir, { recursive: true });
+  }
+  
+  if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+    console.log('SSL certificates not found. Please run ./generate-ssl.sh to create enhanced certificates.');
+    console.log('Using basic certificate generation as fallback...');
+    
+    try {
+      const { execSync } = require('child_process');
+      // Basic fallback certificate generation
+      execSync(`openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=MCP Agentic Platform/CN=localhost"`, {
+        stdio: 'inherit'
+      });
+      console.log('Basic SSL certificate created successfully');
+    } catch (error) {
+      console.warn('Failed to create SSL certificate:', error.message);
+      console.warn('HTTPS server will not be started');
+      return false;
+    }
+  } else {
+    console.log('Using existing enhanced SSL certificates with SAN support');
+  }
+  return true;
+}
+
+// HTTP Server (port 80)
+const HTTP_PORT = process.env.PORT || 80;
+const httpServer = http.createServer(app);
+
+httpServer.listen(HTTP_PORT, () => {
+  console.log(`HTTP Server running at http://localhost:${HTTP_PORT}/ui-advanced.html`);
+});
+
+// HTTPS Server (port 443) - only if SSL certificates are available
+const HTTPS_PORT = 443;
+if (createSelfSignedCert()) {
+  try {
+    const sslOptions = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath)
+    };
+    
+    const httpsServer = https.createServer(sslOptions, app);
+    
+    httpsServer.listen(HTTPS_PORT, () => {
+      console.log(`HTTPS Server running at https://localhost:${HTTPS_PORT}/ui-advanced.html`);
+    });
+  } catch (error) {
+    console.warn('Failed to start HTTPS server:', error.message);
+  }
+}
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  httpServer.close(() => {
+    console.log('HTTP server closed');
+  });
 });

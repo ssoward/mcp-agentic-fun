@@ -1046,20 +1046,65 @@
         // Load tools from server
         async function loadTools() {
             try {
+                console.log('Starting to load tools...');
                 toastManager.info('Loading tools...', 'System');
                 const response = await fetch('/api/tools');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 tools = await response.json();
+                console.log('Loaded tools:', tools);
+                console.log('Number of tools:', tools.length);
+                
                 renderToolsList();
                 renderToolsPalette();
                 toastManager.success(`Successfully loaded ${tools.length} tools`, 'System');
             } catch (error) {
+                console.error('Error loading tools:', error);
                 toastManager.error(`Failed to load tools: ${error.message}`, 'System Error', 8000);
             }
         }
 
+        // Get sample arguments for a tool
+        function getSampleArguments(toolName) {
+            const sampleArgs = {
+                'get-alerts': { state: 'CA' },
+                'get-forecast': { latitude: 40.7128, longitude: -74.0060 },
+                'get-state-forecast-summary': { state: 'NY' },
+                'get-news-headlines': { topic: 'technology' },
+                'get-stock-price': { symbol: 'AAPL' },
+                'plan-trip': { destination: 'Tokyo', date: '2025-07-15' },
+                'remember-preference': { key: 'favorite_city', value: 'San Francisco' },
+                'recall-preference': { key: 'favorite_city' },
+                'long-task': { duration: 10 },
+                'get-logs': { level: 'info' },
+                'llm-summarize': { text: 'This is a sample text that will be summarized by the LLM tool. It contains multiple sentences to demonstrate the summarization capability.' },
+                'multi-agent-demo': { task: 'Plan a marketing strategy for a new product launch' }
+            };
+            
+            return sampleArgs[toolName] || {};
+        }
+
         // Render tools list
         function renderToolsList() {
+            console.log('Rendering tools list...');
             const container = document.getElementById('toolsList');
+            console.log('Container found:', container);
+            console.log('Tools to render:', tools);
+            
+            if (!container) {
+                console.error('Container element #toolsList not found!');
+                return;
+            }
+            
+            if (!tools || tools.length === 0) {
+                console.warn('No tools to render');
+                container.innerHTML = '<p>No tools available</p>';
+                return;
+            }
             
             // Enhanced tool descriptions with execution details
             const toolExecutionDetails = {
