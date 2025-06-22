@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Agentic Platform - Advanced UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #4caf50, #43a047);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content.active { display: block; }
+
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card h3 { font-size: 2.5em; margin-bottom: 10px; }
+        .metric-card p { opacity: 0.9; }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        /* Toast Notification System */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.info { border-left-color: #3b82f6; }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { background: #10b981; }
+        .toast.error .toast-icon { background: #ef4444; }
+        .toast.warning .toast-icon { background: #f59e0b; }
+        .toast.info .toast-icon { background: #3b82f6; }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .toast-close:hover {
+            color: #6b7280;
+            background: #f3f4f6;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 0 0 12px 12px;
+            transition: width linear;
+        }
+
+        .toast.success .toast-progress { background: linear-gradient(90deg, #10b981, #059669); }
+        .toast.error .toast-progress { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        .toast.warning .toast-progress { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .toast.info .toast-progress { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+
+        /* Animation for welcome guide */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Workflow Builder Styles */
+        .workflow-builder {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .tools-palette {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .tool-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .workflow-canvas {
+            background: white;
+            border-radius: 15px;
+            border: 2px dashed #ddd;
+            min-height: 400px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .workflow-step {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            position: relative;
+            cursor: move;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .workflow-step .step-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .workflow-step .step-config {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .step-connector {
+            position: absolute;
+            width: 2px;
+            background: #667eea;
+            left: 50%;
+            height: 30px;
+            top: 100%;
+        }
+
+        /* Tool Configuration Styles */
+        .config-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .config-form {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .config-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 8px 16px;
+            border: 1px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Analytics Styles */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00d084;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Error Handling Styles */
+        .error-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .error-modal.show { display: flex; }
+
+        .error-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+
+        .error-icon {
+            width: 40px;
+            height: 40px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        /* JSON Payload Editor Styles */
+        .payload-editor textarea {
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .payload-editor textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .payload-editor textarea.error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .payload-editor textarea.success {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .payload-toggle {
+            transition: all 0.3s ease;
+        }
+
+        .payload-toggle:hover {
+            background-color: #e2e8f0;
+        }
+
+        .payload-status {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .workflow-builder { grid-template-columns: 1fr; }
+            .config-panel { grid-template-columns: 1fr; }
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚀 MCP Agentic Platform - Advanced UI</h1>
+            <p>Advanced Data Visualization, Workflow Builder & Real-time Analytics</p>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+                <button class="nav-tab" onclick="showTab('workflow')">🔧 Workflow Builder</button>
+                <button class="nav-tab" onclick="showTab('analytics')">📈 Analytics</button>
+                <button class="nav-tab" onclick="showTab('config')">⚙️ Tool Config</button>
+                <button class="nav-tab" onclick="showTab('tools')">🛠️ Tools</button>
+                <button class="nav-tab" onclick="demoToasts()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🔔 Demo Notifications</button>
+            </div>
+            
+            <!-- Welcome Guide -->
+            <div id="welcomeGuide" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative;">
+                <button onclick="dismissWelcome()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; opacity: 0.7;">&times;</button>
+                <h3 style="margin-bottom: 15px;">🚀 Welcome to MCP Agentic Platform Advanced UI!</h3>
+                <p style="margin-bottom: 15px; opacity: 0.9;">This advanced interface provides comprehensive tools for managing your MCP agentic system:</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 0.9em;">
+                    <div>📊 <strong>Dashboard:</strong> Monitor real-time metrics and system health</div>
+                    <div>🔧 <strong>Workflow:</strong> Build visual tool chains with drag & drop</div>
+                    <div>📈 <strong>Analytics:</strong> Track performance and error patterns</div>
+                    <div>⚙️ <strong>Config:</strong> Customize tool behavior and settings</div>
+                    <div>🛠️ <strong>Tools:</strong> Explore and test all 13 MCP tools</div>
+                    <div>🔔 <strong>Notifications:</strong> Elegant toast messaging system</div>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.85em; opacity: 0.8;">
+                    💡 <strong>Quick Start:</strong> Try the "Demo Notifications" button to see the toast system, then visit the Tools tab to test individual MCP tools!
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Dashboard Documentation -->
+            <div style="background: #e3f2fd; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">📊 Dashboard Overview</h3>
+                <p style="color: #424242; margin-bottom: 15px;">Real-time monitoring and analytics for your MCP Agentic Platform. This dashboard provides:</p>
+                <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                    <li><strong>Live Metrics:</strong> Track total executions, success rates, and average latency</li>
+                    <li><strong>Usage Trends:</strong> Visual representation of tool usage patterns over time</li>
+                    <li><strong>Performance Charts:</strong> Real-time charts showing system performance distribution</li>
+                    <li><strong>System Health:</strong> Monitor CPU, memory, and connection status</li>
+                </ul>
+                <p style="color: #757575; font-size: 0.9em; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> Metrics update automatically as you use tools. Try executing some tools to see the dashboard come to life!
+                </p>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="metric-card">
+                    <h3 id="totalExecutions">0</h3>
+                    <p>Total Executions</p>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #00d084, #00a8ff);">
+                    <h3 id="successRate">0%</h3>
+                    <p>Success Rate</p>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #ffa726, #ff7043);">
+                    <h3 id="avgLatency">0ms</h3>
+                    <p>Avg Latency</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Tool Usage Trends</h3>
+                <canvas id="usageChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>Performance Distribution</h3>
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Workflow Builder Tab -->
+        <div id="workflow" class="tab-content">
+            <!-- Workflow Builder Documentation -->
+            <div style="background: #f3e5f5; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🔧 Workflow Builder Guide</h3>
+                <p style="color: #424242; margin-bottom: 15px;">Create powerful multi-step workflows by chaining MCP tools together:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #8e24aa; margin-bottom: 10px;">How to Build Workflows:</h4>
+                        <ol style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Drag & Drop:</strong> Drag tools from the palette to the canvas</li>
+                            <li><strong>Chain Tools:</strong> Arrange tools in sequence for data flow</li>
+                            <li><strong>Configure:</strong> Set parameters for each tool step</li>
+                            <li><strong>Save:</strong> Save workflows for reuse and sharing</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h4 style="color: #8e24aa; margin-bottom: 10px;">Example Workflows:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Weather + News:</strong> Get alerts → Check news about weather events</li>
+                            <li><strong>Stock Analysis:</strong> Get price → Analyze → Store preference</li>
+                            <li><strong>Trip Planning:</strong> Weather forecast → News check → Plan itinerary</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="color: #757575; font-size: 0.9em; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> Start simple with 2-3 tools, then build more complex workflows as you get comfortable!
+                </p>
+            </div>
+
+            <h2>Visual Workflow Builder</h2>
+            <div class="workflow-builder">
+                <div class="tools-palette">
+                    <h3>Available Tools</h3>
+                    <div id="toolsPalette"></div>
+                    <button class="btn btn-primary" onclick="saveWorkflow()">💾 Save Workflow</button>
+                    <button class="btn btn-secondary" onclick="clearWorkflow()">🗑️ Clear</button>
+                </div>
+                <div class="workflow-canvas" id="workflowCanvas">
+                    <p>Drag tools here to build your workflow</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <!-- Analytics Documentation -->
+            <div style="background: #e8f5e8; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">📈 Real-time Analytics Guide</h3>
+                <p style="color: #424242; margin-bottom: 15px;">Monitor system performance and tool behavior in real-time:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #388e3c; margin-bottom: 10px;">What You'll See:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Error Rate Charts:</strong> Track tool failure patterns</li>
+                            <li><strong>Latency Histograms:</strong> Response time distributions</li>
+                            <li><strong>System Health:</strong> CPU, memory, and connection metrics</li>
+                            <li><strong>Tool Performance:</strong> Individual tool success rates</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #388e3c; margin-bottom: 10px;">How It Updates:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Live Data:</strong> Charts update every 5 seconds</li>
+                            <li><strong>Tool Execution:</strong> Metrics change as you use tools</li>
+                            <li><strong>Historical Trends:</strong> See patterns over time</li>
+                            <li><strong>Performance Alerts:</strong> Visual indicators for issues</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="color: #757575; font-size: 0.9em; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> Use this data to optimize tool usage and identify performance bottlenecks!
+                </p>
+            </div>
+
+            <h2><span class="live-indicator"></span>Real-time Performance Analytics</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>Live Error Rate</h3>
+                    <canvas id="errorRateChart" width="300" height="150"></canvas>
+                </div>
+                <div class="analytics-card">
+                    <h3>Latency Histogram</h3>
+                    <canvas id="latencyChart" width="300" height="150"></canvas>
+                </div>
+                <div class="analytics-card">
+                    <h3>Tool Performance</h3>
+                    <canvas id="toolPerformanceChart" width="300" height="150"></canvas>
+                </div>
+                <div class="analytics-card">
+                    <h3>System Health</h3>
+                    <div id="healthMetrics"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool Configuration Tab -->
+        <div id="config" class="tab-content">
+            <!-- Tool Configuration Documentation -->
+            <div style="background: #fff3e0; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #ef6c00; margin-bottom: 10px;">⚙️ Tool Configuration Guide</h3>
+                <p style="color: #424242; margin-bottom: 15px;">Customize tool behavior and execution parameters for optimal performance:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #f57c00; margin-bottom: 10px;">Configuration Options:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Tool Selection:</strong> Choose which tool to configure</li>
+                            <li><strong>Timeout Settings:</strong> Adjust execution time limits</li>
+                            <li><strong>Retry Logic:</strong> Set number of retry attempts</li>
+                            <li><strong>Error Handling:</strong> Configure failure behavior</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #f57c00; margin-bottom: 10px;">Preset Configurations:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Default:</strong> Balanced settings for general use</li>
+                            <li><strong>Aggressive:</strong> Fast execution, fewer retries</li>
+                            <li><strong>Conservative:</strong> Longer timeouts, more retries</li>
+                            <li><strong>Custom:</strong> Create your own configuration</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="color: #757575; font-size: 0.9em; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> Start with presets and modify as needed. Use "Validate Config" to check your settings!
+                </p>
+            </div>
+
+            <h2>Interactive Tool Configuration</h2>
+            <div class="config-panel">
+                <div class="config-form">
+                    <h3>Configure Tool</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="loadPreset('default')">Default</button>
+                        <button class="preset-btn" onclick="loadPreset('aggressive')">Aggressive</button>
+                        <button class="preset-btn" onclick="loadPreset('conservative')">Conservative</button>
+                    </div>
+                    <div id="configForm"></div>
+                    <button class="btn btn-primary" onclick="applyConfig()">Apply Configuration</button>
+                </div>
+                <div class="config-preview">
+                    <h3>Configuration Preview</h3>
+                    <pre id="configPreview"></pre>
+                    <button class="btn btn-secondary" onclick="validateConfig()">Validate Config</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Tab -->
+        <div id="tools" class="tab-content">
+            <!-- Tools Documentation -->
+            <div style="background: #e1f5fe; border-radius: 12px; padding: 20px; margin-bottom: 30px; border-left: 4px solid #03a9f4;">
+                <h3 style="color: #0277bd; margin-bottom: 10px;">🛠️ MCP Tools Directory</h3>
+                <p style="color: #424242; margin-bottom: 15px;">Explore and test all 13 available MCP tools across different categories:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #0288d1; margin-bottom: 10px;">Tool Categories:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Weather:</strong> Alerts, forecasts, and summaries</li>
+                            <li><strong>News:</strong> Headlines and current events</li>
+                            <li><strong>Finance:</strong> Stock prices and market data</li>
+                            <li><strong>Workflow:</strong> Multi-step processes and planning</li>
+                            <li><strong>Memory:</strong> Persistent agent state management</li>
+                            <li><strong>Tasks:</strong> Long-running background processes</li>
+                            <li><strong>Monitoring:</strong> System logs and observability</li>
+                            <li><strong>AI:</strong> LLM integration and multi-agent systems</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #0288d1; margin-bottom: 10px;">How to Use Tools:</h4>
+                        <ul style="color: #616161; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Browse:</strong> View all available tools with descriptions</li>
+                            <li><strong>Test:</strong> Click "Test Tool" to execute with sample data</li>
+                            <li><strong>Parameters:</strong> Each tool shows required/optional parameters</li>
+                            <li><strong>Results:</strong> View execution results and performance metrics</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="color: #757575; font-size: 0.9em; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> Start with simple tools like "get-alerts" or "get-stock-price", then try complex workflows!
+                </p>
+            </div>
+
+            <h2>Available Tools</h2>
+            <div id="toolsList"></div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="error-modal">
+        <div class="error-content">
+            <div class="error-header">
+                <div class="error-icon">!</div>
+                <div>
+                    <h3>Error Detected</h3>
+                    <p id="errorTitle"></p>
+                </div>
+            </div>
+            <div class="error-details" id="errorDetails"></div>
+            <div class="error-actions">
+                <button class="btn btn-danger" onclick="closeErrorModal()">Close</button>
+                <button class="btn btn-secondary" onclick="retryOperation()">Retry</button>
+                <button class="btn btn-success" onclick="runDiagnostics()">Diagnostics</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let tools = [];
+        let executionHistory = [];
+        let currentWorkflow = [];
+        let analytics = {
+            totalExecutions: 0,
+            successRate: 100,
+            avgLatency: 0,
+            errorRate: 0
+        };
+
+        // Toast Notification System
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+                this.toasts = new Map();
+                this.toastId = 0;
+            }
+
+            show(message, type = 'info', title = '', duration = 5000) {
+                const id = this.toastId++;
+                const toast = this.createToast(id, message, type, title, duration);
+                
+                this.container.appendChild(toast);
+                this.toasts.set(id, toast);
+
+                // Trigger animation
+                setTimeout(() => toast.classList.add('show'), 10);
+
+                // Auto dismiss
+                if (duration > 0) {
+                    const progressBar = toast.querySelector('.toast-progress');
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                        progressBar.style.transitionDuration = duration + 'ms';
+                        setTimeout(() => {
+                            progressBar.style.width = '0%';
+                        }, 10);
+                    }
+                    
+                    setTimeout(() => this.dismiss(id), duration);
+                }
+
+                return id;
+            }
+
+            createToast(id, message, type, title, duration) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.dataset.toastId = id;
+
+                const icons = {
+                    success: '✓',
+                    error: '✕',
+                    warning: '⚠',
+                    info: 'i'
+                };
+
+                const titles = {
+                    success: title || 'Success',
+                    error: title || 'Error',
+                    warning: title || 'Warning',
+                    info: title || 'Info'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon">${icons[type] || icons.info}</div>
+                    <div class="toast-content">
+                        <div class="toast-title">${titles[type]}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="toastManager.dismiss(${id})">&times;</button>
+                    ${duration > 0 ? '<div class="toast-progress"></div>' : ''}
+                `;
+
+                return toast;
+            }
+
+            dismiss(id) {
+                const toast = this.toasts.get(id);
+                if (toast) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                        this.toasts.delete(id);
+                    }, 300);
+                }
+            }
+
+            success(message, title, duration) {
+                return this.show(message, 'success', title, duration);
+            }
+
+            error(message, title, duration) {
+                return this.show(message, 'error', title, duration);
+            }
+
+            warning(message, title, duration) {
+                return this.show(message, 'warning', title, duration);
+            }
+
+            info(message, title, duration) {
+                return this.show(message, 'info', title, duration);
+            }
+        }
+
+        // Initialize toast manager
+        const toastManager = new ToastManager();
+
+        // Initialize the application
+        // Initialize the application
+        async function init() {
+            checkWelcomeStatus();
+            toastManager.success('Welcome to MCP Agentic Platform Advanced UI!', 'System Ready', 4000);
+            await loadTools();
+            initCharts();
+            loadWorkflowBuilder();
+            loadToolConfiguration();
+            startRealTimeAnalytics();
+            updateDashboard();
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Welcome guide management
+        function dismissWelcome() {
+            const welcomeGuide = document.getElementById('welcomeGuide');
+            welcomeGuide.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                welcomeGuide.style.display = 'none';
+                localStorage.setItem('welcomeDismissed', 'true');
+            }, 300);
+        }
+
+        // Check if welcome should be shown
+        function checkWelcomeStatus() {
+            const dismissed = localStorage.getItem('welcomeDismissed');
+            if (dismissed === 'true') {
+                document.getElementById('welcomeGuide').style.display = 'none';
+            }
+        }
+
+        // Demo toast notifications
+        function demoToasts() {
+            toastManager.success('This is a success notification! Everything worked perfectly.', 'Success Demo');
+            
+            setTimeout(() => {
+                toastManager.error('This is an error notification with detailed information about what went wrong.', 'Error Demo');
+            }, 1000);
+            
+            setTimeout(() => {
+                toastManager.warning('This is a warning notification to alert you about something important.', 'Warning Demo');
+            }, 2000);
+            
+            setTimeout(() => {
+                toastManager.info('This is an info notification with useful information for the user.', 'Info Demo');
+            }, 3000);
+            
+            setTimeout(() => {
+                toastManager.show('This is a custom notification that stays until manually closed!', 'success', 'Persistent Demo', 0);
+            }, 4000);
+        }
+
+        // Load tools from server
+        async function loadTools() {
+            try {
+                toastManager.info('Loading tools...', 'System');
+                const response = await fetch('/api/tools');
+                tools = await response.json();
+                renderToolsList();
+                renderToolsPalette();
+                toastManager.success(`Successfully loaded ${tools.length} tools`, 'System');
+            } catch (error) {
+                toastManager.error(`Failed to load tools: ${error.message}`, 'System Error', 8000);
+            }
+        }
+
+        // Render tools list
+        function renderToolsList() {
+            const container = document.getElementById('toolsList');
+            
+            // Enhanced tool descriptions with execution details
+            const toolExecutionDetails = {
+                'get-alerts': {
+                    execution: 'Fetches real-time weather alerts and warnings for the specified US state',
+                    params: 'State code (e.g., CA, NY, TX)',
+                    result: 'Returns active weather alerts, severity levels, and affected areas',
+                    example: 'Click to get current weather alerts for California'
+                },
+                'get-forecast': {
+                    execution: 'Retrieves detailed weather forecast for specific latitude/longitude coordinates',
+                    params: 'Latitude and longitude coordinates',
+                    result: 'Returns multi-day forecast with temperature, conditions, and precipitation',
+                    example: 'Click to get forecast for coordinates (40.7128, -74.0060) - NYC'
+                },
+                'get-state-forecast-summary': {
+                    execution: 'Generates comprehensive weather summary combining alerts and forecasts for a state',
+                    params: 'US state code',
+                    result: 'Returns combined weather intelligence with alerts, forecast, and recommendations',
+                    example: 'Click to get complete weather summary for New York state'
+                },
+                'get-news-headlines': {
+                    execution: 'Fetches latest news headlines filtered by category or topic',
+                    params: 'Optional category (technology, business, sports, etc.)',
+                    result: 'Returns current headlines with sources, publication times, and brief summaries',
+                    example: 'Click to get latest technology news headlines'
+                },
+                'get-stock-price': {
+                    execution: 'Retrieves real-time stock market data and price information',
+                    params: 'Stock symbol (AAPL, GOOGL, MSFT, etc.)',
+                    result: 'Returns current price, change percentage, volume, and market status',
+                    example: 'Click to get current Apple (AAPL) stock price and metrics'
+                },
+                'plan-trip': {
+                    execution: 'Creates intelligent trip itinerary combining weather, news, and local information',
+                    params: 'Destination city and optional date',
+                    result: 'Returns comprehensive trip plan with weather forecast, local news, and recommendations',
+                    example: 'Click to plan a trip to Tokyo with weather and activity suggestions'
+                },
+                'remember-preference': {
+                    execution: 'Stores user preferences in persistent agent memory for future reference',
+                    params: 'Key-value pair (preference name and value)',
+                    result: 'Confirms storage and shows the saved preference in agent memory',
+                    example: 'Click to store your favorite city preference'
+                },
+                'recall-preference': {
+                    execution: 'Retrieves previously stored preferences from agent memory',
+                    params: 'Preference key name to look up',
+                    result: 'Returns the stored value or indicates if preference was not found',
+                    example: 'Click to recall your stored favorite city preference'
+                },
+                'long-task': {
+                    execution: 'Simulates long-running background process with progress tracking',
+                    params: 'Optional duration in seconds (default: random 1-30 seconds)',
+                    result: 'Shows task progress, completion status, and execution time',
+                    example: 'Click to start a simulated background task with real-time progress'
+                },
+                'get-logs': {
+                    execution: 'Retrieves system logs and monitoring data for observability',
+                    params: 'Optional log level filter (error, warn, info, debug)',
+                    result: 'Returns formatted log entries with timestamps and system metrics',
+                    example: 'Click to view recent system logs and performance metrics'
+                },
+                'llm-summarize': {
+                    execution: 'Processes text through simulated LLM for intelligent summarization',
+                    params: 'Text content to analyze and summarize',
+                    result: 'Returns condensed summary with key points and insights',
+                    example: 'Click to summarize a sample text using AI-powered analysis'
+                },
+                'multi-agent-demo': {
+                    execution: 'Demonstrates multi-agent collaboration with simulated agent interactions',
+                    params: 'Optional task description for agents to collaborate on',
+                    result: 'Shows agent communication, task distribution, and collaborative results',
+                    example: 'Click to see Agent A, B, and C collaborate on a complex task'
+                }
+            };
+
+            container.innerHTML = tools.map(tool => {
+                const details = toolExecutionDetails[tool.name] || {
+                    execution: 'Executes the tool with provided parameters',
+                    params: 'Tool-specific parameters',
+                    result: 'Returns tool execution results',
+                    example: 'Click to test this tool'
+                };
+
+                return `
+                    <div class="tool-item" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid ${getCategoryColor(tool.category)};">
+                        <div style="display: flex; justify-content: between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <h3 style="color: #2d3748; margin-bottom: 8px; display: flex; align-items: center;">
+                                    ${getCategoryIcon(tool.category)} ${tool.name}
+                                    <span style="background: ${getCategoryColor(tool.category)}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; margin-left: 10px;">${tool.category}</span>
+                                </h3>
+                                <p style="color: #4a5568; margin-bottom: 15px; font-size: 1.05em;">${tool.description}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f7fafc; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #2d3748; margin-bottom: 10px; font-size: 0.9em; font-weight: 600;">🔧 What happens when you click "Test Tool":</h4>
+                            <div style="display: grid; gap: 8px; font-size: 0.85em;">
+                                <div><strong style="color: #2b6cb0;">Execution:</strong> <span style="color: #4a5568;">${details.execution}</span></div>
+                                <div><strong style="color: #2b6cb0;">Parameters:</strong> <span style="color: #4a5568;">${details.params}</span></div>
+                                <div><strong style="color: #2b6cb0;">Result:</strong> <span style="color: #4a5568;">${details.result}</span></div>
+                                <div style="background: #e6fffa; padding: 8px; border-radius: 4px; border-left: 3px solid #38b2ac;">
+                                    <strong style="color: #234e52;">💡 Example:</strong> <span style="color: #234e52;">${details.example}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- JSON Payload Editor -->
+                        <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="background: #f8fafc; padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer;" onclick="togglePayloadEditor('${tool.name}')">
+                                <h4 style="margin: 0; color: #2d3748; font-size: 0.9em; display: flex; align-items: center; justify-content: space-between;">
+                                    <span>📝 Edit JSON Payload</span>
+                                    <span id="payload-toggle-${tool.name}" style="font-size: 0.8em; color: #718096;">▼ Click to expand</span>
+                                </h4>
+                                <p style="margin: 5px 0 0 0; font-size: 0.75em; color: #718096;">Click to customize the request parameters sent to the MCP server</p>
+                            </div>
+                            <div id="payload-editor-${tool.name}" style="display: none; padding: 15px;">
+                                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                                    <h5 style="margin: 0 0 8px 0; color: #1e40af; font-size: 0.8em;">📋 Available Parameters:</h5>
+                                    <div style="font-size: 0.75em; color: #374151;">
+                                        ${tool.parameters ? tool.parameters.map(param => `
+                                            <div style="margin-bottom: 4px;">
+                                                <strong>${param.name}</strong> 
+                                                <span style="color: #6b7280;">(${param.type}${param.required ? ', required' : ', optional'})</span>
+                                                - ${param.description}
+                                            </div>
+                                        `).join('') : 'No parameters defined for this tool.'}
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #4a5568; font-size: 0.85em;">Request Payload (JSON):</label>
+                                    <textarea 
+                                        id="payload-${tool.name}" 
+                                        class="payload-editor"
+                                        style="width: 100%; height: 120px; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 0.85em; background: #f9fafb; resize: vertical;"
+                                        placeholder="Enter JSON payload here..."
+                                        oninput="validatePayload('${tool.name}')"
+                                        onblur="validatePayload('${tool.name}')">${JSON.stringify(getSampleArguments(tool.name), null, 2)}</textarea>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <button onclick="validatePayload('${tool.name}')" style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                        ✓ Validate JSON
+                                    </button>
+                                    <button onclick="formatPayload('${tool.name}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                        ✨ Format
+                                    </button>
+                                    <button onclick="copyPayload('${tool.name}')" style="padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                        📋 Copy
+                                    </button>
+                                    <button onclick="resetPayload('${tool.name}')" style="padding: 6px 12px; background: #6b7280; color: white; border: none; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                        🔄 Reset
+                                    </button>
+                                    <span id="payload-status-${tool.name}" style="font-size: 0.8em; color: #10b981;">✓ Valid JSON</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="testTool('${tool.name}')" style="background: linear-gradient(135deg, ${getCategoryColor(tool.category)}, ${getDarkerCategoryColor(tool.category)}); border: none; padding: 10px 20px; border-radius: 8px; color: white; font-weight: 500; cursor: pointer; transition: all 0.3s ease; flex: 1;">
+                                🚀 Test with Default Args
+                            </button>
+                            <button class="btn btn-secondary" onclick="testToolWithCustomPayload('${tool.name}')" style="background: #4b5563; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; flex: 1;">
+                                🎯 Test with Custom JSON
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper functions for tool categorization
+        function getCategoryColor(category) {
+            const colors = {
+                'Weather': '#3b82f6',
+                'News': '#8b5cf6', 
+                'Finance': '#10b981',
+                'Workflow': '#f59e0b',
+                'Memory': '#ef4444',
+                'Tasks': '#06b6d4',
+                'Monitoring': '#84cc16',
+                'AI': '#f97316'
+            };
+            return colors[category] || '#6b7280';
+        }
+
+        function getDarkerCategoryColor(category) {
+            const colors = {
+                'Weather': '#2563eb',
+                'News': '#7c3aed',
+                'Finance': '#059669', 
+                'Workflow': '#d97706',
+                'Memory': '#dc2626',
+                'Tasks': '#0891b2',
+                'Monitoring': '#65a30d',
+                'AI': '#ea580c'
+            };
+            return colors[category] || '#4b5563';
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'Weather': '🌤️',
+                'News': '📰',
+                'Finance': '💰', 
+                'Workflow': '🔄',
+                'Memory': '🧠',
+                'Tasks': '⚡',
+                'Monitoring': '📊',
+                'AI': '🤖'
+            };
+            return icons[category] || '🛠️';
+        }
+
+        // Render workflow builder palette
+        function renderToolsPalette() {
+            const container = document.getElementById('toolsPalette');
+            container.innerHTML = tools.map(tool => `
+                <div class="tool-item" draggable="true" data-tool="${tool.name}">
+                    <strong>${tool.name}</strong>
+                    <p style="font-size: 0.8em; margin-top: 5px;">${tool.description.substring(0, 50)}...</p>
+                </div>
+            `).join('');
+
+            // Add drag event listeners
+            container.querySelectorAll('.tool-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.dataset.tool);
+                });
+            });
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Usage Chart
+            const usageCtx = document.getElementById('usageChart').getContext('2d');
+            window.usageChart = new Chart(usageCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Tool Executions',
+                        data: [],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Performance Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            window.performanceChart = new Chart(perfCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Success', 'Error', 'Timeout'],
+                    datasets: [{
+                        data: [85, 10, 5],
+                        backgroundColor: ['#00d084', '#ff6b6b', '#ffa726']
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // Error Rate Chart
+            const errorCtx = document.getElementById('errorRateChart').getContext('2d');
+            window.errorRateChart = new Chart(errorCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Error Rate %',
+                        data: [],
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            // Latency Chart
+            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+            window.latencyChart = new Chart(latencyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-100ms', '100-500ms', '500ms-1s', '1s+'],
+                    datasets: [{
+                        label: 'Requests',
+                        data: [45, 30, 20, 5],
+                        backgroundColor: '#667eea'
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // Tool Performance Chart
+            const toolPerfCtx = document.getElementById('toolPerformanceChart').getContext('2d');
+            window.toolPerformanceChart = new Chart(toolPerfCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Speed', 'Accuracy', 'Reliability', 'Efficiency'],
+                    datasets: [{
+                        label: 'Performance',
+                        data: [85, 92, 88, 90],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        // Load workflow builder
+        function loadWorkflowBuilder() {
+            const canvas = document.getElementById('workflowCanvas');
+            
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                canvas.style.borderColor = '#667eea';
+            });
+
+            canvas.addEventListener('dragleave', () => {
+                canvas.style.borderColor = '#ddd';
+            });
+
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvas.style.borderColor = '#ddd';
+                
+                const toolName = e.dataTransfer.getData('text/plain');
+                addWorkflowStep(toolName);
+            });
+
+            // Make workflow steps sortable
+            new Sortable(canvas, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen'
+            });
+        }
+
+        // Add workflow step
+        function addWorkflowStep(toolName) {
+            const tool = tools.find(t => t.name === toolName);
+            if (!tool) return;
+
+            const step = {
+                id: Date.now(),
+                tool: toolName,
+                config: {}
+            };
+
+            currentWorkflow.push(step);
+            renderWorkflow();
+        }
+
+        // Render workflow
+        function renderWorkflow() {
+            const canvas = document.getElementById('workflowCanvas');
+            
+            if (currentWorkflow.length === 0) {
+                canvas.innerHTML = '<p>Drag tools here to build your workflow</p>';
+                return;
+            }
+
+            canvas.innerHTML = currentWorkflow.map((step, index) => `
+                <div class="workflow-step" data-step="${step.id}">
+                    <div class="step-title">${step.tool}</div>
+                    <div class="step-config">Step ${index + 1}</div>
+                    <button onclick="removeWorkflowStep(${step.id})" style="position: absolute; top: 5px; right: 5px; background: rgba(255,255,255,0.3); border: none; color: white; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    ${index < currentWorkflow.length - 1 ? '<div class="step-connector"></div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        // Remove workflow step
+        function removeWorkflowStep(stepId) {
+            currentWorkflow = currentWorkflow.filter(step => step.id !== stepId);
+            renderWorkflow();
+        }
+
+        // Save workflow
+        function saveWorkflow() {
+            if (currentWorkflow.length === 0) {
+                toastManager.warning('No workflow steps to save', 'Workflow');
+                return;
+            }
+
+            const workflowName = prompt('Workflow name:') || 'Untitled Workflow';
+            const workflow = {
+                id: Date.now(),
+                name: workflowName,
+                steps: currentWorkflow
+            };
+
+            localStorage.setItem('workflows', JSON.stringify([
+                ...JSON.parse(localStorage.getItem('workflows') || '[]'),
+                workflow
+            ]));
+
+            toastManager.success(`Workflow "${workflowName}" saved successfully!`, 'Workflow');
+        }
+
+        // Clear workflow
+        function clearWorkflow() {
+            if (confirm('Clear current workflow?')) {
+                currentWorkflow = [];
+                renderWorkflow();
+                toastManager.info('Workflow cleared', 'Workflow');
+            }
+        }
+
+        // Load tool configuration
+        function loadToolConfiguration() {
+            const form = document.getElementById('configForm');
+            const preview = document.getElementById('configPreview');
+
+            // Sample configuration form
+            form.innerHTML = `
+                <div class="form-group">
+                    <label>Tool Selection</label>
+                    <select id="configTool" onchange="updateConfigPreview()">
+                        <option value="">Select a tool...</option>
+                        ${tools.map(tool => `<option value="${tool.name}">${tool.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input type="number" id="configTimeout" value="5000" onchange="updateConfigPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Retry Attempts</label>
+                    <input type="number" id="configRetries" value="3" min="0" max="10" onchange="updateConfigPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="configPriority" onchange="updateConfigPreview()">
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Custom Parameters (JSON)</label>
+                    <textarea id="configParams" rows="4" placeholder='{"key": "value"}' onchange="updateConfigPreview()"></textarea>
+                </div>
+            `;
+
+            updateConfigPreview();
+        }
+
+        // Update configuration preview
+        function updateConfigPreview() {
+            const config = {
+                tool: document.getElementById('configTool')?.value || '',
+                timeout: parseInt(document.getElementById('configTimeout')?.value || '5000'),
+                retries: parseInt(document.getElementById('configRetries')?.value || '3'),
+                priority: document.getElementById('configPriority')?.value || 'normal',
+                params: {}
+            };
+
+            try {
+                const paramsText = document.getElementById('configParams')?.value || '{}';
+                config.params = JSON.parse(paramsText);
+            } catch (e) {
+                config.params = { error: 'Invalid JSON' };
+            }
+
+            document.getElementById('configPreview').textContent = JSON.stringify(config, null, 2);
+        }
+
+        // Load configuration presets
+        function loadPreset(preset) {
+            const presets = {
+                default: { timeout: 5000, retries: 3, priority: 'normal' },
+                aggressive: { timeout: 1000, retries: 1, priority: 'high' },
+                conservative: { timeout: 10000, retries: 5, priority: 'low' }
+            };
+
+            const config = presets[preset];
+            if (config) {
+                document.getElementById('configTimeout').value = config.timeout;
+                document.getElementById('configRetries').value = config.retries;
+                document.getElementById('configPriority').value = config.priority;
+                updateConfigPreview();
+            }
+        }
+
+        // Apply configuration
+        function applyConfig() {
+            const config = JSON.parse(document.getElementById('configPreview').textContent);
+            toastManager.info(`Applying configuration for ${config.tool}...`, 'Configuration');
+            toastManager.success('Configuration applied successfully!', 'Configuration');
+        }
+
+        // Validate configuration
+        function validateConfig() {
+            try {
+                const config = JSON.parse(document.getElementById('configPreview').textContent);
+                
+                if (!config.tool) {
+                    throw new Error('Tool selection is required');
+                }
+                
+                if (config.timeout < 100 || config.timeout > 60000) {
+                    throw new Error('Timeout must be between 100ms and 60s');
+                }
+                
+                if (config.retries < 0 || config.retries > 10) {
+                    throw new Error('Retries must be between 0 and 10');
+                }
+
+                toastManager.success('Configuration is valid and ready to use!', 'Validation Success');
+            } catch (error) {
+                toastManager.error(`Configuration error: ${error.message}`, 'Validation Error', 6000);
+            }
+        }
+
+        // Test tool with real API calls
+        async function testTool(toolName) {
+            const startTime = Date.now();
+            
+            try {
+                toastManager.info(`Executing ${toolName}...`, 'Tool Execution');
+                
+                // Get sample arguments for the tool
+                const args = getSampleArguments(toolName);
+                
+                // Make real API call to the MCP server
+                const response = await fetch('/mcp-client', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tool: toolName,
+                        args: args
+                    })
+                });
+                
+                const latency = Date.now() - startTime;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                recordExecution(toolName, true, latency);
+                
+                // Show detailed result in toast
+                toastManager.success(
+                    `${toolName} completed successfully in ${latency}ms. Result: ${JSON.stringify(result).substring(0, 100)}...`, 
+                    'Tool Success', 
+                    6000
+                );
+                
+                // Log full result to console for debugging
+                console.log(`Tool ${toolName} result:`, result);
+                
+            } catch (error) {
+                const latency = Date.now() - startTime;
+                recordExecution(toolName, false, latency);
+                toastManager.error(
+                    `${toolName} execution failed after ${latency}ms: ${error.message}`, 
+                    'Tool Error', 
+                    8000
+                );
+                console.error(`Tool ${toolName} error:`, error);
+            }
+        }
+
+        // JSON Payload Editor Functions
+        function togglePayloadEditor(toolName) {
+            const editor = document.getElementById(`payload-editor-${toolName}`);
+            const toggle = document.getElementById(`payload-toggle-${toolName}`);
+            
+            if (editor.style.display === 'none') {
+                editor.style.display = 'block';
+                toggle.textContent = '▲ Click to collapse';
+                // Validate JSON when opening
+                validatePayload(toolName);
+            } else {
+                editor.style.display = 'none';
+                toggle.textContent = '▼ Click to expand';
+            }
+        }
+
+        function validatePayload(toolName) {
+            const textarea = document.getElementById(`payload-${toolName}`);
+            const status = document.getElementById(`payload-status-${toolName}`);
+            
+            // Remove previous classes
+            textarea.classList.remove('error', 'success');
+            
+            try {
+                const jsonValue = textarea.value.trim();
+                if (!jsonValue) {
+                    status.textContent = '⚠ Empty payload';
+                    status.style.color = '#f59e0b';
+                    return false;
+                }
+                
+                const parsed = JSON.parse(jsonValue);
+                status.textContent = '✓ Valid JSON';
+                status.style.color = '#10b981';
+                textarea.classList.add('success');
+                return true;
+            } catch (error) {
+                status.textContent = `✗ Invalid JSON: ${error.message}`;
+                status.style.color = '#ef4444';
+                textarea.classList.add('error');
+                return false;
+            }
+        }
+
+        function resetPayload(toolName) {
+            const textarea = document.getElementById(`payload-${toolName}`);
+            const defaultArgs = getSampleArguments(toolName);
+            textarea.value = JSON.stringify(defaultArgs, null, 2);
+            validatePayload(toolName);
+            toastManager.info(`Reset ${toolName} payload to default values`, 'Payload Reset');
+        }
+
+        function testToolWithCustomPayload(toolName) {
+            const textarea = document.getElementById(`payload-${toolName}`);
+            
+            if (!validatePayload(toolName)) {
+                toastManager.error('Please fix JSON syntax errors before testing', 'Invalid Payload');
+                return;
+            }
+            
+            try {
+                const customArgs = JSON.parse(textarea.value.trim() || '{}');
+                testToolWithArgs(toolName, customArgs);
+            } catch (error) {
+                toastManager.error(`Failed to parse JSON payload: ${error.message}`, 'Payload Error');
+            }
+        }
+
+        async function testToolWithArgs(toolName, args) {
+            const startTime = Date.now();
+            
+            try {
+                toastManager.info(`Executing ${toolName} with custom payload...`, 'Tool Execution');
+                
+                // Make real API call to the MCP server
+                const response = await fetch('/mcp-client', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tool: toolName,
+                        args: args
+                    })
+                });
+                
+                const latency = Date.now() - startTime;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                recordExecution(toolName, true, latency);
+                
+                // Show detailed result in toast
+                toastManager.success(
+                    `${toolName} completed successfully in ${latency}ms with custom payload. Result: ${JSON.stringify(result).substring(0, 100)}...`, 
+                    'Custom Tool Success', 
+                    6000
+                );
+                
+                // Log full result to console for debugging
+                console.log(`Tool ${toolName} with custom args result:`, result);
+                console.log(`Custom arguments used:`, args);
+                
+            } catch (error) {
+                const latency = Date.now() - startTime;
+                recordExecution(toolName, false, latency);
+                toastManager.error(
+                    `${toolName} execution failed after ${latency}ms: ${error.message}`, 
+                    'Custom Tool Error', 
+                    8000
+                );
+                console.error(`Tool ${toolName} with custom args error:`, error);
+                console.error(`Custom arguments used:`, args);
+            }
+        }
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+
+        function formatPayload(toolName) {
+            const textarea = document.getElementById(`payload-${toolName}`);
+            
+            try {
+                const jsonValue = textarea.value.trim();
+                if (!jsonValue) {
+                    toastManager.warning('No JSON content to format', 'Format Warning');
+                    return;
+                }
+                
+                const parsed = JSON.parse(jsonValue);
+                textarea.value = JSON.stringify(parsed, null, 2);
+                validatePayload(toolName);
+                toastManager.success('JSON formatted successfully', 'Format Success');
+            } catch (error) {
+                toastManager.error(`Cannot format invalid JSON: ${error.message}`, 'Format Error');
+            }
+        }
+
+        function copyPayload(toolName) {
+            const textarea = document.getElementById(`payload-${toolName}`);
+            
+            if (!validatePayload(toolName)) {
+                toastManager.error('Cannot copy invalid JSON', 'Copy Error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                toastManager.success('JSON payload copied to clipboard', 'Copy Success');
+            }).catch(() => {
+                // Fallback for older browsers
+                textarea.select();
+                document.execCommand('copy');
+                toastManager.success('JSON payload copied to clipboard', 'Copy Success');
+            });
+        }
+    </script>
+</body>
+</html>

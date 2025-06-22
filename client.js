@@ -11,7 +11,7 @@ if (!tool || !argsJson) {
 }
 
 const args = JSON.parse(argsJson);
-const serverProc = spawn("node", ["build/index.js"], { stdio: ["pipe", "pipe", "inherit"] });
+const serverProc = spawn("node", ["build/src/index.js"], { stdio: ["pipe", "pipe", "inherit"] });
 
 const initializeRequest = {
   jsonrpc: "2.0",

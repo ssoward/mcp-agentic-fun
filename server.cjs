@@ -92,6 +92,113 @@ app.post("/mcp-client", (req, res) => {
   serverProc.stdin.write(JSON.stringify(initializeRequest) + "\n");
 });
 
+// API endpoint to get available tools
+app.get("/api/tools", (req, res) => {
+  const tools = [
+    {
+      name: "get-alerts",
+      description: "Get weather alerts for a state",
+      category: "Weather",
+      parameters: [
+        { name: "state", type: "string", required: true, description: "State code (e.g., CA, NY)" }
+      ]
+    },
+    {
+      name: "get-forecast",
+      description: "Get weather forecast for coordinates",
+      category: "Weather", 
+      parameters: [
+        { name: "latitude", type: "number", required: true, description: "Latitude coordinate" },
+        { name: "longitude", type: "number", required: true, description: "Longitude coordinate" }
+      ]
+    },
+    {
+      name: "get-state-forecast-summary",
+      description: "Get forecast summary for a state",
+      category: "Weather",
+      parameters: [
+        { name: "state", type: "string", required: true, description: "State code (e.g., CA, NY)" }
+      ]
+    },
+    {
+      name: "get-news-headlines",
+      description: "Get latest news headlines for a topic",
+      category: "News",
+      parameters: [
+        { name: "topic", type: "string", required: true, description: "News topic (e.g., technology, sports)" }
+      ]
+    },
+    {
+      name: "get-stock-price",
+      description: "Get current stock price for a symbol",
+      category: "Finance",
+      parameters: [
+        { name: "symbol", type: "string", required: true, description: "Stock symbol (e.g., AAPL, GOOGL)" }
+      ]
+    },
+    {
+      name: "plan-trip",
+      description: "Plan a trip with itinerary",
+      category: "Workflow",
+      parameters: [
+        { name: "destination", type: "string", required: true, description: "Destination city" },
+        { name: "date", type: "string", required: true, description: "Trip date" }
+      ]
+    },
+    {
+      name: "remember-preference",
+      description: "Store a user preference",
+      category: "Memory",
+      parameters: [
+        { name: "key", type: "string", required: true, description: "Preference key" },
+        { name: "value", type: "string", required: true, description: "Preference value" }
+      ]
+    },
+    {
+      name: "recall-preference",
+      description: "Retrieve a stored preference",
+      category: "Memory",
+      parameters: [
+        { name: "key", type: "string", required: true, description: "Preference key to retrieve" }
+      ]
+    },
+    {
+      name: "long-task",
+      description: "Execute a long-running background task",
+      category: "Tasks",
+      parameters: [
+        { name: "duration", type: "number", required: false, description: "Duration in seconds" }
+      ]
+    },
+    {
+      name: "get-logs",
+      description: "Get system logs for monitoring",
+      category: "Monitoring",
+      parameters: [
+        { name: "level", type: "string", required: false, description: "Log level (error, warn, info)" }
+      ]
+    },
+    {
+      name: "llm-summarize",
+      description: "Summarize text using LLM",
+      category: "AI",
+      parameters: [
+        { name: "text", type: "string", required: true, description: "Text to summarize" }
+      ]
+    },
+    {
+      name: "multi-agent-demo",
+      description: "Demonstrate multi-agent collaboration",
+      category: "AI",
+      parameters: [
+        { name: "task", type: "string", required: false, description: "Task for agents to collaborate on" }
+      ]
+    }
+  ];
+  
+  res.json(tools);
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`MCP Agentic Development Platform UI running at http://localhost:${PORT}/ui.html`);
