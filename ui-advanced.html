@@ -1801,6 +1801,91 @@
                 toastManager.success('JSON payload copied to clipboard', 'Copy Success');
             });
         }
+
+        // Record tool execution for analytics
+        function recordExecution(toolName, success, latency) {
+            // Update analytics
+            updateAnalytics(success, latency);
+            
+            // Add to execution history
+            executionHistory.push({
+                tool: toolName,
+                success: success,
+                latency: latency,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep only last 100 executions to prevent memory issues
+            if (executionHistory.length > 100) {
+                executionHistory = executionHistory.slice(-100);
+            }
+            
+            console.log(`Recorded execution: ${toolName}, success: ${success}, latency: ${latency}ms`);
+        }
+
+        // Real-time Analytics Functions
+        function startRealTimeAnalytics() {
+            // Update analytics dashboard every 5 seconds
+            setInterval(updateDashboard, 5000);
+            
+            // Initial update
+            updateDashboard();
+            
+            console.log('Real-time analytics started');
+        }
+
+        function updateDashboard() {
+            try {
+                // Update analytics cards with current data
+                updateAnalyticsCard('total-executions', analytics.totalExecutions);
+                updateAnalyticsCard('success-rate', Math.round(analytics.successRate) + '%');
+                updateAnalyticsCard('avg-latency', analytics.avgLatency + 'ms');
+                updateAnalyticsCard('error-rate', Math.round(analytics.errorRate) + '%');
+                
+                // Update live indicator
+                const liveIndicator = document.querySelector('.live-indicator');
+                if (liveIndicator) {
+                    liveIndicator.style.animation = 'none';
+                    setTimeout(() => {
+                        liveIndicator.style.animation = 'pulse 2s infinite';
+                    }, 10);
+                }
+                
+                console.log('Dashboard updated:', analytics);
+            } catch (error) {
+                console.warn('Error updating dashboard:', error);
+            }
+        }
+
+        function updateAnalyticsCard(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+                
+                // Add a brief highlight animation
+                element.style.transform = 'scale(1.05)';
+                element.style.transition = 'transform 0.2s ease';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+        // Update analytics when tools are executed
+        function updateAnalytics(success, latency) {
+            analytics.totalExecutions++;
+            
+            if (success) {
+                analytics.successRate = ((analytics.successRate * (analytics.totalExecutions - 1)) + 100) / analytics.totalExecutions;
+                analytics.errorRate = 100 - analytics.successRate;
+            } else {
+                analytics.successRate = (analytics.successRate * (analytics.totalExecutions - 1)) / analytics.totalExecutions;
+                analytics.errorRate = 100 - analytics.successRate;
+            }
+            
+            // Update average latency
+            analytics.avgLatency = Math.round(((analytics.avgLatency * (analytics.totalExecutions - 1)) + latency) / analytics.totalExecutions);
+        }
     </script>
 </body>
 </html>
